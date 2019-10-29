@@ -12,6 +12,9 @@ class blood:
         self._state = 0
         self._collection_time=datetime.now() #=Current system time
 
+    def get_state(self):
+        return self._state
+
     # Functions like a predicate.
     # Returns false if either the state is invalid. (Something has gone wrong somewhere so don't trust the blood)
     # OR the blood is due to expire in the next 25 hours.
