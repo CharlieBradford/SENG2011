@@ -33,11 +33,13 @@ class storage :
     def discardBlood(self):
         # Do some ongoing loop to check for 00:00
         for li in self.bloodStorage:
-            if li:
-                if self.daysTillExpiry(li[0]) < 2:
-                    li.popleft()
-                else:
-                    break
+            discarding = True
+            while discarding:
+                if li:
+                    if self.daysTillExpiry(li[0]) < 2:
+                        li.popleft()
+                    else:
+                        discarding = False
 
     # Stores blood in the appropriate queue
     def storeBlood(self, blood):
