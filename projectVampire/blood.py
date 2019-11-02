@@ -25,10 +25,12 @@ class blood:
             return False
         
 
-    def verify_blood(self):
+    def verify_blood(self,blood_type,rhesus):
         if (valid()):
             if self._state == 0:
                 self._state = 1
+                self._type=blood_type
+                self._rhesus = rhesus
         else:
             self._state=5
 
@@ -52,6 +54,10 @@ class blood:
                 self._state = 4
         else:
             self._state=5
+    
+    def get_blood_type(self):
+        if self._state>=1 and self._state<=4:
+            return (self._type,self._rhesus)
 
     # Rejection of blood for any reason - rejected by pathology, lost, expired
     def reject_blood(self):
