@@ -26,28 +26,6 @@ class donor
     }
 }
 
-
-
-// Date in Dafny?
-method get_hour() returns (hour:int)
-ensures 0<=hour<=23
-{
-    return 14;
-}
-
-
-method get_day() returns (day:int)
-ensures 0<=day
-{
-    return 10;
-}
-
-method get_minute() returns (minute:int)
-ensures 0<=minute<=59
-{
-    return 36;
-}
-
 method Test()
 {
     var doner := new Donor();
