@@ -16,9 +16,9 @@ class storage :
     # ABN_blood = 7
 
     # Constructor
-    def __init__(self, name, coord):
-        self.name = name
-        self.coord = coord
+    def __init__(self, name, location):
+        self._name = name
+        self._location = location
         OP_blood = deque()
         AP_blood = deque()
         BP_blood = deque()
@@ -27,12 +27,17 @@ class storage :
         AN_blood = deque()
         BN_blood = deque()
         ABN_blood = deque()
-        self.bloodStorage = [OP_blood, AP_blood, BP_blood, ABP_blood, ON_blood, AN_blood, BN_blood, ABN_blood]
+        self._bloodStorage = [OP_blood, AP_blood, BP_blood, ABP_blood, ON_blood, AN_blood, BN_blood, ABN_blood]
+        self._transportationManager = None
+
+    # Adds a transportation manager
+    def addTransportationManager(self, tManager):
+        self._transportationManager = tManager
 
     # Discards blood at 00:00 everyday
     def discardBlood(self):
         # Do some ongoing loop to check for 00:00
-        for li in self.bloodStorage:
+        for li in self._bloodStorage:
             discarding = True
             while discarding:
                 if li:
@@ -43,18 +48,19 @@ class storage :
 
     # Stores blood in the appropriate queue
     def storeBlood(self, blood):
-        index = self.findIndex(blood.type, blood.rh)
-        self.bloodStorage[index].append(blood)
+        index = self.findIndex(blood.type, blood.rhesus)
+        self._bloodStorage[index].append(blood)
         
     # Gets appropriate blood packet from storage and notifies transport to send it to destination
     def serviceRequest(self, type, rh, dest):
         index = self.findIndex(type, rh)
-        blood = self.bloodStorage[index].popleft()
+        blood = self._bloodStorage[index].popleft()
         self.notifyTransport(blood, dest)
 
-    # Notifies transport so that they can prepare to transport the blood packet
+    # Notifies transport so that they can transport the blood packet
     def notifyTransport(self, blood, dest):
-        pass
+        self._transportationManager.prepareRequest(blood, dest)
+        self._transportationManager.dispatchBlood()
 
 
 
@@ -85,10 +91,42 @@ class storage :
 
         return time_diff.days
 
+class transportationManager():
 
+    def __init__(self, location):
+        self.location = location
+        self.requests = []
 
+    def prepareRequest(self, blood, dest):
+        route = self.createRoute(dest)
+        request = transportationRequest(blood, route)
+        self.requests.append(request)
 
+    def createRoute(self, dest):
+        route = transportationRoute(self.location, dest)
+        route.calculateDuration()
+        return route
 
+    def dispatchBlood(self, blood, location):
+        for req in self.requests:
+            self.requests.remove(req)
+            # Do something to let the system know that something is dispatched
+            # and should arrive at the destination after route.duration
+        print('All reuests have been dispatched')
 
+class transportationRoute:
 
+    def __init__(self, source, destination):
+        self.source = source
+        self.destination = destination
+        self.duration = 0
+    
+    def calculateDuration(self):
+        # (by coords, just use linear journey - calculate hypotenuse)
+        pass
 
+class transportationRequest:
+
+    def __init__(self, blood, route):
+        self._blood = blood
+        self._route = route
