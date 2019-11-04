@@ -1,10 +1,10 @@
 #!/bin/bash/python3
-<<<<<<< Updated upstream
-=======
 
 from time import time
 
 from . import *
+
+from time import time
 
 PLANET_CIRCUMFRENCE = 2 * 3.14 * 6.317E3
 
@@ -67,4 +67,3 @@ class system:
             elif com == "clinic":
                 pass
 
->>>>>>> Stashed changes
