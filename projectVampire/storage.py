@@ -91,42 +91,42 @@ class storage :
 
         return time_diff.days
 
-class transportationManager():
+# class transportationManager():
 
-    def __init__(self, location):
-        self.location = location
-        self.requests = []
+#     def __init__(self, location):
+#         self.location = location
+#         self.requests = []
 
-    def prepareRequest(self, blood, dest):
-        route = self.createRoute(dest)
-        request = transportationRequest(blood, route)
-        self.requests.append(request)
+#     def prepareRequest(self, blood, dest):
+#         route = self.createRoute(dest)
+#         request = transportationRequest(blood, route)
+#         self.requests.append(request)
 
-    def createRoute(self, dest):
-        route = transportationRoute(self.location, dest)
-        route.calculateDuration()
-        return route
+#     def createRoute(self, dest):
+#         route = transportationRoute(self.location, dest)
+#         route.calculateDuration()
+#         return route
 
-    def dispatchBlood(self, blood, location):
-        for req in self.requests:
-            self.requests.remove(req)
-            # Do something to let the system know that something is dispatched
-            # and should arrive at the destination after route.duration
-        print('All reuests have been dispatched')
+#     def dispatchBlood(self, blood, location):
+#         for req in self.requests:
+#             self.requests.remove(req)
+#             # Do something to let the system know that something is dispatched
+#             # and should arrive at the destination after route.duration
+#         print('All reuests have been dispatched')
 
-class transportationRoute:
+# class transportationRoute:
 
-    def __init__(self, source, destination):
-        self.source = source
-        self.destination = destination
-        self.duration = 0
+#     def __init__(self, source, destination):
+#         self.source = source
+#         self.destination = destination
+#         self.duration = 0
     
-    def calculateDuration(self):
-        # (by coords, just use linear journey - calculate hypotenuse)
-        pass
+#     def calculateDuration(self):
+#         # (by coords, just use linear journey - calculate hypotenuse)
+#         pass
 
-class transportationRequest:
+# class transportationRequest:
 
-    def __init__(self, blood, route):
-        self._blood = blood
-        self._route = route
+#     def __init__(self, blood, route):
+#         self._blood = blood
+#         self._route = route
