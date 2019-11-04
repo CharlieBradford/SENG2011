@@ -1,72 +1,97 @@
 // state:
+// unsafe = -1
 // unverified = 0
 // verified = 1
 // storage = 2
 // dispatch = 3
 // delivered = 4
-// unsafe = 5
-datatype Blood_types = A | B | AB
+
+datatype Blood_types = O | A | B | AB
 
 class Blood{
     var state: int;
-    var hour: int;
-    var minute:int;
-    var day:int;
+    var collection_time: int; //Seconds since Unix Epoch
+    var expiry_time:int
     var blood_type: Blood_types;
+    var rhesus: bool;
 
-    predicate Valid()
+    predicate method Valid()
     reads this
-    {0<=state<=5}
+    {-1<=state<=4}
 
-    constructor (dayin:int,hourin:int,minutein:int)
+    predicate method expired(curr_time:int)
+    reads this
+    {curr_time>expiry_time}
+
+    predicate method safe(curr_time:int)
+    reads this
+    {0<=state<=4 && !expired(curr_time)}
+
+    constructor (secondsin:int)
     modifies this
-    requires 0<=dayin && 0<=hourin<=23 && 0<=minutein<=59
-    ensures 0<=day && 0<=hour<=23 && 0<=minute<=59
-    ensures Valid();
+    requires secondsin>=0
+    ensures collection_time>=0 && collection_time==secondsin
     ensures state == 0;
     {
-        hour:=hourin;
-        day:=dayin;
-        minute:=minutein;
+        collection_time := secondsin;
+        expiry_time:=collection_time;
         state := 0;
     }
 
-    method verify(determined_type:Blood_types)
-    modifies this
-    requires Valid();
+    method verify(curr_time:int,determined_type:Blood_types,rhesus_in:bool)
+    modifies this;
     requires state==0;
-    ensures Valid();
-    ensures state ==1;
+    ensures if safe(curr_time) then state ==1 else state==-1
     ensures blood_type==determined_type
-    {state:=1; blood_type:=determined_type;}
+    ensures rhesus == rhesus_in
+    {
+        if safe(curr_time) {
+            state:=1;
+        } else {
+            state:=-1;
+        }
+    blood_type:=determined_type;
+    rhesus:=rhesus_in;
+    }
 
-    method store()
+    method store(curr_time:int)
     modifies this
-    requires Valid();
     requires state==1;
-    ensures Valid();
-    ensures state ==2;
-    {state:=2;}
+    ensures if safe(curr_time) then state ==2 else state==-1;
+    {
+        if safe(curr_time) {
+            state:=2;
+        } else {
+            state:=-1;
+        }  
+    }
 
-    method dispatch()
+    method dispatch(curr_time:int)
     modifies this
-    requires Valid();
     requires state==2;
-    ensures Valid();
-    ensures state ==3;
-    {state:=3;}
+    ensures if safe(curr_time) then state ==3 else state==-1;
+    {
+        if safe(curr_time) {
+            state:=3;
+        } else {
+            state:=-1;
+        }         
+    }
 
-    method delivered()
+    method delivered(curr_time:int)
     modifies this
-    requires Valid();
     requires state==3;
-    ensures Valid();
-    ensures state ==4;
-    {state:=4;}
+    ensures if safe(curr_time) then state ==4 else state==-1;
+    {
+        if safe(curr_time) {
+            state:=4;
+        } else {
+            state:=-1;
+        }           
+    }
 
     method reject()
     modifies this
-    ensures Valid();
-    ensures state ==5;
-    {state:=5;}
+    ensures state ==-1;
+    {state:=-1;}
 }

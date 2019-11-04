@@ -2,26 +2,26 @@
 
 class donor
 {
-    var last_donation: int // Day of last donation as integer since system instantiation
+    var last_donation: int // last donation as integer second since Unix Epoch
 
     constructor ()
     modifies this
-    ensures last_donation==-7
-    {last_donation:=-7;}
+    ensures last_donation==0
+    {last_donation:=0;}
 
 
-    predicate donation_allowed(day:int)
+    predicate donation_allowed(curr_time:int)
     reads this
-    {day - last_donation >= 7}
+    {(curr_time - last_donation)/86400 >= 7}
 
-    method collectBlood(day:int,hour:int,minute:int) returns (blood:Blood)
+    method collect_Blood(curr_time:int) returns (blood:Blood)
     modifies this
-    requires donation_allowed(day)
-    requires 0<=day && 0<=hour<=23 && 0<=minute<=59
-    ensures last_donation == day
+    requires donation_allowed(curr_time)
+    requires curr_time>=0
+    ensures last_donation == curr_time
     {
-        last_donation:=day;
-        var blud := new Blood(day,hour,minute);
+        last_donation:=curr_time;
+        var blud := new Blood(curr_time);
         return blud;
     }
 }
@@ -30,8 +30,8 @@ method Test()
 {
     var doner := new Donor();
 
-    var blud_1 := doner.collectBlood(1,1,1);
-    assert !doner.donation_allowed(2);
-    assert doner.donation_allowed(17);
+    var blud_1 := doner.collect_Blood(1000000);
+    assert !doner.donation_allowed(1000060);
+    assert doner.donation_allowed(2000000);
     // doner.collectBlood(2,2,2);
 }
