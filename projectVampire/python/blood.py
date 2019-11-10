@@ -8,13 +8,14 @@ class blood:
     # dispatch = 3
     # delivered = 4
     
-    SECS_IN_DAY = 86400
-    BLOOD_LIFETIME = 42 * SECS_IN_DAY
+
 
     def __init__(self,seconds_in):
+        self.SECS_IN_DAY = 86400
+        self.BLOOD_LIFETIME = 42 * self.SECS_IN_DAY
         self._state = 0
         self._collection_time=seconds_in
-        self._expiry_time=self._collection_time+(BLOOD_LIFETIME)
+        self._expiry_time=self._collection_time+(self.BLOOD_LIFETIME)
 
     def get_state(self):
         return self._state

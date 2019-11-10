@@ -1,16 +1,17 @@
 import datetime
 class time_sec:
 
-    time_0 = datetime.datetime.utcfromtimestamp(0)
+    
 
     @staticmethod
     def get_seconds(time_in):
+        time_0 = datetime.datetime.utcfromtimestamp(0)
         diff = (time_in - time_0)
         return diff.total_seconds()
     
     @staticmethod
     def get_now():
-        return get_seconds(datetime.datetime.now())
+        return time_sec.get_seconds(datetime.datetime.now())
 
     # Returns the number of full days.
     @staticmethod

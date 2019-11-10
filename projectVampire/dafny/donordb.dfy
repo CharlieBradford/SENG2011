@@ -24,6 +24,10 @@ class donor
         var blud := new Blood(curr_time);
         return blud;
     }
+
+    method time_remaining(curr_time:int) returns (time:int)
+    // reads this
+    {return ((last_donation+86400*7)-curr_time);}
 }
 
 method Test()
