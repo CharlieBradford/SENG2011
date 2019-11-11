@@ -3,6 +3,8 @@ from collections import deque
 # Used to deal with time
 from datetime import datetime
 
+# Own queue in dafny, verify that queues are sorted
+
 class storage :
 
     # Index for bloodStorage
@@ -57,10 +59,9 @@ class storage :
         blood = self._bloodStorage[index].popleft()
         self.notifyTransport(blood, dest)
 
-    # Notifies transport so that they can transport the blood packet
+    # Gives blood to transport so that they can prepare to dispatch it to the destination
     def notifyTransport(self, blood, dest):
-        self._transportationManager.prepareRequest(blood, dest)
-        self._transportationManager.dispatchBlood()
+        self._transportationManager.receive(blood, dest)
 
 
 
@@ -90,43 +91,3 @@ class storage :
         time_diff = curr_time - blood_expiry
 
         return time_diff.days
-
-# class transportationManager():
-
-#     def __init__(self, location):
-#         self.location = location
-#         self.requests = []
-
-#     def prepareRequest(self, blood, dest):
-#         route = self.createRoute(dest)
-#         request = transportationRequest(blood, route)
-#         self.requests.append(request)
-
-#     def createRoute(self, dest):
-#         route = transportationRoute(self.location, dest)
-#         route.calculateDuration()
-#         return route
-
-#     def dispatchBlood(self, blood, location):
-#         for req in self.requests:
-#             self.requests.remove(req)
-#             # Do something to let the system know that something is dispatched
-#             # and should arrive at the destination after route.duration
-#         print('All reuests have been dispatched')
-
-# class transportationRoute:
-
-#     def __init__(self, source, destination):
-#         self.source = source
-#         self.destination = destination
-#         self.duration = 0
-    
-#     def calculateDuration(self):
-#         # (by coords, just use linear journey - calculate hypotenuse)
-#         pass
-
-# class transportationRequest:
-
-#     def __init__(self, blood, route):
-#         self._blood = blood
-#         self._route = route
