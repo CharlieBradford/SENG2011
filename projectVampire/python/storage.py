@@ -1,5 +1,3 @@
-# Used for FIFO queues
-from collections import deque
 # Used to deal with time
 from datetime import datetime
 
@@ -8,64 +6,88 @@ from datetime import datetime
 class storage :
 
     # Index for bloodStorage
-    # OP_blood = 0
-    # AP_blood = 1
+    # AP_blood = 0
+    # AN_blood = 1
     # BP_blood = 2
-    # ABP_blood = 3
-    # ON_blood = 4
-    # AN_blood = 5
-    # BN_blood = 6
-    # ABN_blood = 7
+    # BN_blood = 3
+    # ABP_blood = 4
+    # ABN_blood = 5
+    # OP_blood = 6
+    # ON_blood = 7
 
     # Constructor
     def __init__(self, name, location):
         self._name = name
         self._location = location
-        OP_blood = deque()
-        AP_blood = deque()
-        BP_blood = deque()
-        ABP_blood = deque()
-        ON_blood = deque()
-        AN_blood = deque()
-        BN_blood = deque()
-        ABN_blood = deque()
-        self._bloodStorage = [OP_blood, AP_blood, BP_blood, ABP_blood, ON_blood, AN_blood, BN_blood, ABN_blood]
-        self._transportationManager = None
+        self._bloodStorage = []
+        i = 0
+        while i < 8:
+            self._bloodStorage[i] = []
+            i = i + 1
+        self._transManager = None
 
     # Adds a transportation manager
-    def addTransportationManager(self, tManager):
-        self._transportationManager = tManager
+    def addTransportationManager(self, manager):
+        self._transManager = manager
 
-    # Discards blood at 00:00 everyday
-    def discardBlood(self):
-        # Do some ongoing loop to check for 00:00
-        for li in self._bloodStorage:
-            discarding = True
-            while discarding:
-                if li:
-                    if self.daysTillExpiry(li[0]) < 2:
-                        li.popleft()
-                    else:
-                        discarding = False
-
-    # Stores blood in the appropriate queue
+    # Stores blood and sorts according to expiry
     def storeBlood(self, blood):
         index = self.findIndex(blood.type, blood.rhesus)
-        self._bloodStorage[index].append(blood)
+        prevSize = len(self._bloodStorage[index])
+        newArray = []
+        i = 0
+        while i < prevSize:
+            newArray[i] = self._bloodStorage[index][i]
+            i = i + 1
+        newArray[prevSize] = blood
+        self._bloodStorage[index] = newArray
+        insertionSort(self._bloodStorage[index])
+
+    # Discard expired blood
+    def discardBlood(self, currTime):
+        # Do some ongoing loop to check for 00:00
+        i = 0
+        while i < len(self._bloodStorage):
+            numToDiscard = 0
+            j = 0
+            while j < len(self._bloodStorage[i]):
+                if currTime - self._bloodStorage[i][j].expiry_time < 60*60*24*2:
+                    numToDiscard = numToDiscard + 1
+                j = j + 1
+            self.removeN(i, numToDiscard)
+            i = i + 1
         
     # Gets appropriate blood packet from storage and notifies transport to send it to destination
     def serviceRequest(self, type, rh, dest):
         index = self.findIndex(type, rh)
-        blood = self._bloodStorage[index].popleft()
+        blood = self.pop(index)
         self.notifyTransport(blood, dest)
 
     # Gives blood to transport so that they can prepare to dispatch it to the destination
     def notifyTransport(self, blood, dest):
-        self._transportationManager.receive(blood, dest)
+        self._transManager.receive(blood, dest)
 
+    # Helper: Remove head of array and return it
+    def pop(self, index):
+        a = self._bloodStorage[index]
+        b = a[0]
+        newArray = []
+        i = 0
+        while i + 1 < len(a):
+            newArray[i] = a[i + 1]
+        self._bloodStorage[index] = newArray
+        return b
 
+    # Helper: Remove n elements from head of array
+    def removeN(self, index, numToDiscard):
+        a = self._bloodStorage[index]
+        newArray = []
+        i = 0
+        while i + numToDiscard < len(a):
+            newArray[i] = a[i + numToDiscard]
+        self._bloodStorage[index] = newArray
 
-    # HELPER FUNCTION - Finds correct index for corresponding blood type
+    # Helper: Returns the index that is storing the required blood type
     def findIndex(self, type, rh):
         if type == "O" and rh == True:
             return 0
@@ -83,11 +105,3 @@ class storage :
             return 6
         elif type == "AB" and rh == False:
             return 7
-
-    # HELPER FUNCTION - Finds correct index for corresponding blood type
-    def daysTillExpiry(self, blood):
-        curr_time = datetime.datetime.now()
-        blood_expiry = blood.getExpiry()
-        time_diff = curr_time - blood_expiry
-
-        return time_diff.days
