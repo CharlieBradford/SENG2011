@@ -24,7 +24,7 @@ class transportationManager {
             toSend[i] := bld;
             toRoute[i] := route;
         } else { // if a route is not stored
-            //route := 0; // get new route from system
+            route := 0; // get new route from system
             destinatiions[dst] = route; // store new route
             toSend[i] := bld;
             toRoute[i] := route;
