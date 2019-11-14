@@ -4,13 +4,13 @@ from clinic import clinic
 from hospital import hospital
 
 class system:
-    self.clinic = clinic("A",1,2)
-    self.hospital = hospital("A",1,2)
-    self.donordb = {}
+    clinic = clinic("A",1,2)
+    hospital = hospital("A",1,2)
+    donordb = {}
 
     def clinic_donation(self,donor_id):
-        blood = self.clinic.collect_blood(donor_id,time_sec.time_sec.get_now())
+        blood = self.clinic.collect_blood(self.donordb,donor_id,time_sec.get_now())
 
     def hospital_donation(self,donor_id):
-        blood = self.clinic.collect_blood(donor_id,time_sec.time_sec.get_now())
+        blood = self.hospital.collect_blood(self.donordb,donor_id,time_sec.get_now())
 
