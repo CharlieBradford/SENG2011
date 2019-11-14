@@ -3,8 +3,8 @@
 
 class transportationManager {
 	
-	var locale: int // give each location an int value?
-	var destinations: array<int> := new int[10] // routes to destinations
+	var locale: int; // give each location an int value?
+	var destinations: array<int> := new int[10]; // routes to destinations
 	var toSend: array<Blood> := new Blood[10]; // may need to have another array that matches the blood destinations to each index or create a class that can hold blood and its dest
     var toRoute: array<Route> := new Route[10] // routes (match with toSend array)
 
