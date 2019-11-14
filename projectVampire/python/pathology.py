@@ -3,9 +3,14 @@ from random import random
 from time_sec import time_sec
 
 class pathology:
+    def __init__(self,transport_manager):
+        self.transport = transport_manager
+
+        
     def accept_blood(self,blood):
-        pass
+        blood = self.verify(blood)
         # TODO -> Send blood back to transport
+        # self.transport.send(blood) # Syntax not exact
 
 
     def verify(self,blood):
