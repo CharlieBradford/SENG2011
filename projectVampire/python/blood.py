@@ -32,6 +32,10 @@ class blood:
     def safe(self,curr_time):
         return 0<=self._state<=4 and not self.expired(curr_time)
 
+
+    def getExpiryTime(self):
+        return self._expiry_time
+
     # All transition methods accept curr_time as an int
     def verify_blood(self,curr_time,blood_type,rhesus):
         if (valid() and safe(curr_time)):
