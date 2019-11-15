@@ -19,6 +19,11 @@ class Blood{
     reads this
     {-1<=state<=4}
 
+
+
+// Every function takes in the current time as an integer(Number of seconds since Unix Epoch time)
+// Theres a python class time_sec that lets us get this easily. You can write your function to similarly
+// take in curr_time and just work with that
     predicate method expired(curr_time:int)
     reads this
     {curr_time>expiry_time}
@@ -31,15 +36,18 @@ class Blood{
     modifies this
     requires secondsin>=0
     ensures collection_time>=0 && collection_time==secondsin
+    ensures Valid()
     ensures state == 0;
     {
         collection_time := secondsin;
-        expiry_time:=collection_time;
+        expiry_time:= (secondsin + 43*86400);
         state := 0;
     }
 
     method verify(curr_time:int,determined_type:Blood_types,rhesus_in:bool)
     modifies this;
+    requires Valid()
+    ensures Valid()
     requires state==0;
     ensures if safe(curr_time) then state ==1 else state==-1
     ensures blood_type==determined_type
@@ -56,6 +64,8 @@ class Blood{
 
     method store(curr_time:int)
     modifies this
+    requires Valid()
+    ensures Valid()
     requires state==1;
     ensures if safe(curr_time) then state ==2 else state==-1;
     {
@@ -69,6 +79,8 @@ class Blood{
     method dispatch(curr_time:int)
     modifies this
     requires state==2;
+    requires Valid()
+    ensures Valid()
     ensures if safe(curr_time) then state ==3 else state==-1;
     {
         if safe(curr_time) {
@@ -80,6 +92,8 @@ class Blood{
 
     method delivered(curr_time:int)
     modifies this
+    requires Valid()
+    ensures Valid()
     requires state==3;
     ensures if safe(curr_time) then state ==4 else state==-1;
     {
@@ -92,6 +106,7 @@ class Blood{
 
     method reject()
     modifies this
+    ensures Valid()
     ensures state ==-1;
     {state:=-1;}
 }
