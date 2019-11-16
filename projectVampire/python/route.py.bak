@@ -1,0 +1,62 @@
+
+import sys
+
+class transportNode:
+	def __init__(self, x, y, connected):
+		self._x = x
+		self._y = y
+		self._connected = connected
+
+	def getX():
+		return self._x
+
+	def getY():
+		return self._y
+
+	def getConnected():
+		return self._connected
+
+
+class route:
+
+    def __init__(self, src, dest, connected):
+        self._nodes = connected
+        self._x = 3
+        self._y = 5
+        self._src = src
+        self._dest = dest
+
+
+    def getX():
+		return self._x
+
+	def getY():
+		return self._y		
+
+	def getConnected():
+		return self._connected
+
+    # gives a list of nodes to arrive at dest
+    def generatePath(nodes):
+    	bestDist = 0
+    	curr = self
+    	path = []
+    	for node in nodes:
+    		if node in curr.getConnected():
+	    		# Find node that gets you closest to dest
+	    		cDist = sqrt((curr.getX()^2 - node.getX()^2) + (curr.getY()^2 - node.getY()^2)
+				if cDist > bestDist:
+					bestDist = cDist
+					curr = node
+					path.append(node)
+
+
+
+    # gives distance to destination
+    def getDistance():
+    	return 0
+
+	# gives the time taken to arrive at dest
+	def getTime():
+		return 3
+
