@@ -25,3 +25,5 @@ class transportationManager():
         		self.toSend.remove(tup)
        			print('Blood has been dispatched')
 
+        return blood;
+
