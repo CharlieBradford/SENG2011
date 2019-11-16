@@ -43,6 +43,9 @@ class storage :
         self._bloodStorage[index] = newArray
         insertionSort(self._bloodStorage[index])
 
+    def accept(self,blood):
+        self.storeBlood(blood)
+
     # Discard expired blood
     def discardBlood(self, currTime):
         # Do some ongoing loop to check for 00:00

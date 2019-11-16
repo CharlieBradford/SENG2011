@@ -6,7 +6,7 @@ class hospital:
 
     def __init__(self, name, x, y):
         self.name = name
-        self.pathology = pathology()
+        self.pathology = pathology(self)
         self.Xcoordinate = x
         self.Ycoordinate = y
 

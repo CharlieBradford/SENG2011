@@ -7,15 +7,15 @@ class transportationManager():
 
     # Get blood
     def receive(self, blood, dest):
-    	route = destinations[dest]
-    	if route == None:
-    		print("Don't have a route yet")
-    		# need to request a route
+        route = destinations[dest]
+        if route == None:
+            print("Don't have a route yet")
+            # need to request a route
         self.toSend.append([blood,route])
 
     # Add route to destinations
     def addRoute(self, location, route):
-        self.destinations[location] = route;
+        self.destinations[location] = route
 
     # Send blood to transportationRoute
     def dispatchBlood(self, blood, tRoute):
@@ -25,5 +25,5 @@ class transportationManager():
         		self.toSend.remove(tup)
        			print('Blood has been dispatched')
 
-        return blood;
+        return blood
 
