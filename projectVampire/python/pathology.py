@@ -12,7 +12,6 @@ class pathology:
         self.transport_manager.receive(blud) # Destination storage
         self.transport_manager.dispatch()
 
-
     def verify(self,blood):
         if (blood.get_state==0):
             randint = random.randint(0,3)
