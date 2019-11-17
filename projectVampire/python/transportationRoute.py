@@ -2,8 +2,9 @@ import math
 import sys
 import time
 from recipient import recipient
+import random
 MAX_DIST=20
-
+LOSS_CHANCE = 5
 
 # locations to help simulate the path the blood will take
 class transportNode:
@@ -28,8 +29,9 @@ class transportNode:
 
 class transportationRoute:
 
-	def __init__(self, world):
-		self._world = world            
+	def __init__(self, world, sys):
+		self._world = world        
+		self._sys = sys    
 
 	def getConnected(self):
 	   return self._src.getConnected()
@@ -84,7 +86,7 @@ class transportationRoute:
 		return pred, dist
 
 	def sendBlood(self, bloodTup, source):
-		blood = bloodTup[0]
+		bld = bloodTup[0]
 		dest = bloodTup[1]
 		#assert isinstance(dest, recipient)
 		#print(type(dest.locale.locale).__name__)
@@ -100,13 +102,24 @@ class transportationRoute:
 			final.insert(0,curr)
 
 		prevTime = 0
+		arrived = True
 		for node in final[1::]:
 			print("Sending blood to", node.name, ", will take", round(dist[node.name]-prevTime,1),"seconds")
-			time.sleep(round(dist[node.name]-prevTime,1))
+			lossChance = random.randint(1,100)
+			if lossChance <= LOSS_CHANCE:
+				arrived = False
+				print("\n**WARNING:Blood has been lost along the way**\n")
+				time.sleep(1.5)
+				break
+			time.sleep((round(dist[node.name]-prevTime,1)*0.3)) # speed up for sake of testing
 			prevTime = dist[node.name]
 		
-
-		dest.locale.arrivalAccept(blood)
+		if arrived:
+			dest.locale.arrivalAccept(bld)
+		elif type(dest.locale.locale).__name__ == 'recipient' and arrived == False:
+			print("Requesting blood again")
+			time.sleep(1.5)
+			self._sys.RequestBlood(bld.blood_type, bld.rhesus, dest)
 
 # Testing
 

@@ -16,6 +16,8 @@ while True:
         system.hospital_donation(splitlist[2])
     elif len(splitlist)==2 and splitlist[0]=='clinic' and splitlist[1]=='send':
         system.ClinicRoute(system.getClinic()) # need to make dynamic
+    elif len(splitlist)==2 and splitlist[0]=='hospital' and splitlist[1]=='send':
+        system.HospitalRoute(system.getHospital()) # need to make dynamic
 
     # Syntax: request <destination> <Bloodtype> <Rhesus>(+/-)
     elif len(splitlist)==4 and splitlist[0]=='request':

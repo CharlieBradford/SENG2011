@@ -1,6 +1,6 @@
 # Used to deal with time
 from datetime import datetime
-
+from blood import blood 
 # Own queue in dafny, verify that queues are sorted
 
 class storage :
@@ -33,7 +33,7 @@ class storage :
 
     # Adds a transportation manager
     def setTransportManager(self, tman):
-        self.setTransportManager = tman
+        self.transportManager = tman
 
     # Stores blood and sorts according to expiry
     def storeBlood(self, blood):
@@ -70,13 +70,18 @@ class storage :
         
     # Gets appropriate blood packet from storage and notifies transport to send it to destination
     def serviceRequest(self, type, rh, dest):
-        index = self.findIndex(type, rh)
-        blood = self.pop(index)
-        self.notifyTransport(blood, dest)
+        #index = self.findIndex(type, rh) # TODO , seems to be some issues here
+        #blood = self.pop(index)          # TODO , seems to be some issues here
+
+        # just creating a new blood object in the meantime
+        toSend = blood(1)
+        print("Request has been sent from storage")
+        self.notifyTransport(toSend, dest)
 
     # Gives blood to transport so that they can prepare to dispatch it to the destination
     def notifyTransport(self, blood, dest):
-        self._transManager.receive(blood, dest)
+        self.transportManager.receive(blood, dest)
+        self.transportManager.dispatchBlood()
 
     # Helper: Remove head of array and return it
     def pop(self, index):
