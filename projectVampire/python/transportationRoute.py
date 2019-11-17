@@ -119,7 +119,7 @@ class transportationRoute:
 		elif type(dest.locale.locale).__name__ == 'recipient' and arrived == False:
 			print("Requesting blood again")
 			time.sleep(1.5)
-			self._sys.RequestBlood(bld.blood_type, bld.rhesus, dest)
+			self._sys.RequestBlood(dest, bld.blood_type, bld.rhesus)
 
 # Testing
 

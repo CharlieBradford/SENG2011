@@ -78,7 +78,6 @@ class storage :
     # Gets appropriate blood packet from storage and notifies transport to send it to destination
     def serviceRequest(self, type, rh, dest):
         index = self.findIndex(type, rh)
-
         blood = self.pop(index)
         if (blood==None):
             print("No blood of requested type available")
@@ -97,10 +96,11 @@ class storage :
         if len(a)<1:
             return None
         b = a[0]
-        newArray = []
+        newArray = [None] * (len(a)-1)
         i = 0
         while i + 1 < len(a):
             newArray[i] = a[i + 1]
+            i = i + 1
         self._bloodStorage[index] = newArray
         return b
 
@@ -115,6 +115,7 @@ class storage :
 
     # Helper: Returns the index that is storing the required blood type
     def findIndex(self, type, rh):
+        print("FINDING INDEX: type = "+type)
         if type == "O" and rh == True:
             return 0
         elif type == "A" and rh == True:
