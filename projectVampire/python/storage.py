@@ -1,10 +1,7 @@
 # Used to deal with time
 from datetime import datetime
-<<<<<<< HEAD
 from insertionSort import *
-=======
 from blood import blood 
->>>>>>> unified
 # Own queue in dafny, verify that queues are sorted
 
 class storage :
@@ -52,7 +49,13 @@ class storage :
             i = i + 1
         newArray.append(blood)
         self._bloodStorage[index] = newArray
-        insertionSort(self._bloodStorage[index])
+
+
+        # Generate list of blood times
+        valuearray = []
+        for i in range(0,len(self._bloodStorage[index])):
+            valuearray.append(self._bloodStorage[index][i].getExpiryTime())
+        insertionSort(valuearray,self._bloodStorage[index])
 
     def accept(self,blood):
         print("**Blood arrived at storage**")
@@ -78,14 +81,10 @@ class storage :
 
         blood = self.pop(index)
         if (blood==None):
-            print("No blood available")
+            print("No blood of requested type available")
         else:
             self.notifyTransport(blood, dest)
 
-        # just creating a new blood object in the meantime
-        # toSend = blood(1)
-        print("Request has been sent from storage")
-        self.notifyTransport(toSend, dest)
 
     # Gives blood to transport so that they can prepare to dispatch it to the destination
     def notifyTransport(self, blood, dest):
@@ -95,7 +94,8 @@ class storage :
     # Helper: Remove head of array and return it
     def pop(self, index):
         a = self._bloodStorage[index]
-        print()
+        if len(a)<1:
+            return None
         b = a[0]
         newArray = []
         i = 0

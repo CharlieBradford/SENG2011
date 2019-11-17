@@ -46,7 +46,8 @@ def insertionSort(toSort, toMatch):
 	assert toSort != None
 	assert toMatch != None
 	assert len(toSort) == len(toMatch)
-	assert noNulls(toMatch) and sameValues(toSort, toMatch)
+	assert noNulls(toMatch)
+	assert sameValues(toSort, toMatch)
 
 
 	start = 1

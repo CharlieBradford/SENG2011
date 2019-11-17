@@ -105,9 +105,6 @@ class transportationRoute:
 		arrived = True
 		for node in final[1::]:
 			print("Sending blood to", node.name, ", will take", round(dist[node.name]-prevTime,1),"seconds")
-<<<<<<< HEAD
-			# time.sleep(round(dist[node.name]-prevTime,1))
-=======
 			lossChance = random.randint(1,100)
 			if lossChance <= LOSS_CHANCE:
 				arrived = False
@@ -115,7 +112,6 @@ class transportationRoute:
 				time.sleep(1.5)
 				break
 			time.sleep((round(dist[node.name]-prevTime,1)*0.3)) # speed up for sake of testing
->>>>>>> unified
 			prevTime = dist[node.name]
 		
 		if arrived:
