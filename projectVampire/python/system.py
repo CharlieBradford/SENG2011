@@ -95,11 +95,7 @@ class system:
 		self.node5.addConnection(self.pathoNode)
 
 		self.world = [self.node0,self.node1,self.node2,self.node3,self.node4,self.node5,self.clinicNode,self.hospitalNode,self.recipientNode,self.storeNode,self.pathoNode]
-		self.routingSystem = transportationRoute(self.world)
-
-	# example of sending blood to a hosptal node from clinic node
-	#bld = [blood(50), recipientNode]
-	#routingSystem.sendBlood(bld, clinicNode)
+		self.routingSystem = transportationRoute(self.world, self)
 
 
 	def clinic_donation(self,donor_id):
@@ -107,60 +103,57 @@ class system:
 		return blood
 
 	def hospital_donation(self,donor_id):
-		blood = self.hosp.collect_blood(self.donordb,donor_id,time_sec.get_now())
-
-		# TODO Call transport to pathology
-		clinicTransportManager.receive(blood) # Dest pathology
-		clinicTransportManager.dispatch()
-	
-
-	def hospital_donation(self,donor_id):
-		blood = self.hospital.collect_blood(self.donordb,donor_id,time_sec.get_now())
-		return blood
+		blood = self.hosp.collect_blood(self.donordb,donor_id,time_sec.get_now(), self.getPathology())
 
 	#TODO: going to need to init some stuff like dest routes
 
 
-	def HospitalRoute(self):
-		#TODO: sort out storage tings
-		self.transportationManager.receive(self.hospital_donation(), "str8 to storage")
-
-
-	def getClinic(self):
-		return self.clinic
-
-	def ClinicRoute(self, clinic):
-		toRoute = self.clinic.obtainBlood()
-		#print(toRoute)
+	def HospitalRoute(self, hospi):
+		toRoute = hospi.obtainBlood()
 		if len(toRoute) == 0:
 			print("No blood to send")
 		else:
 			for blood in toRoute:
-				#print("Routing", blood)
-				self.clinic.transportManager.receive(blood)
-				self.clinic.transportManager.dispatchBlood()
-		#TODO: fix transportationmanager dispatch thingy across multiple parts
+				hospi.transportManager.receive(blood, None)
+				hospi.transportManager.dispatchBlood()
 
-		#pathology.accept_blood(self.transportationManager.dispatch(blood,troute))
-		
-		#TODO : patho send to storage to finalise user journey
+	def getClinic(self):
+		# make dynamic so 'best' clinic is chosen # TODO
+		return self.clinic
+
+	def getHospital(self):
+		# make dynamic so 'best' hospital is chosen # TODO
+		return self.hosp
+
+	def getPathology(self):
+		# make dynamic so 'best' pathology is chosen # TODO
+		return self.patho
+
+	def ClinicRoute(self, clinic):
+		toRoute = clinic.obtainBlood()
+		if len(toRoute) == 0:
+			print("No blood to send")
+		else:
+			for blood in toRoute:
+				clinic.transportManager.receive(blood, None)
+				clinic.transportManager.dispatchBlood()
 
 	def RequestBlood(self,recipient,blood_type,rhesus):
-		self.store.serviceRequest(blood_type, rhesus, recipient)
+		# need to dynamically choose the storage location to use # TODO
+		self.store.serviceRequest(blood_type, rhesus, self.recipientNode) # need to dynamically choose the recipient # TODO
 		#TODO/TO ASK: storage and recv
 
 
 	def getRequiredNode(self, blood):
 		tNode = None
-		#print("State", blood.state)
 		if blood.state == blood_state.unverified:
-			# needs to be verified
-			tNode = self.pathoNode # need to dynamically choose 'best' node of destination type, do this in transportationRoute
+			# to be verified
+			tNode = self.pathoNode # need to dynamically choose 'best' node of destination type, do this in transportationRoute # TODO
 		elif blood.state == blood_state.storage:
-			# needs to be sent to recipient
+			# to be sent to recipient
 			tNode = self.recipientNode
 		else:
-			# needs to be stored
+			# to be stored
 			tNode = self.storeNode
 		return tNode
 

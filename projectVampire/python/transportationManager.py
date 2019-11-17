@@ -12,11 +12,12 @@ class transportationManager:
 		self.locale.accept(blood)
 		#self.locale.accept(blood)
 
-	def receive(self, blood):
+	def receive(self, blood, dest):
 		transportNode = None
-
+		if dest == None:
+			dest = self.getBloodDest(blood) 
 		# blood is to be sent
-		self.toSend.append([blood,self.getBloodDest(blood)])
+		self.toSend.append([blood,dest])
 
 	# Add route to destinations
 	#def addRoute(self, location, route):
@@ -24,10 +25,11 @@ class transportationManager:
 
 	# Send blood to transportationRoute
 	def dispatchBlood(self):
-		for tup in self.toSend:
-			print('**Blood has been dispatched and is en route**')
-			self._sys.getRoutingSys().sendBlood(tup, self.node)
-			self.toSend.remove(tup)
+		#for tup in self.toSend:
+		for i in range(len(self.toSend)):
+			print('**Blood has been dispatched**')
+			self._sys.getRoutingSys().sendBlood(self.toSend.pop(i), self.node)
+			
 
 	def setNode(self, node):
 		self.node = node

@@ -5,6 +5,10 @@ from time_sec import time_sec
 import time
 
 class pathology:
+
+    def __init__(self):
+        self.transport_manager = None
+
     def setTransportManager(self,transport_manager):
         self.transport_manager=transport_manager
     
@@ -16,17 +20,17 @@ class pathology:
         blud = self.verify(blood)
         # TODO -> Send blood back to transport
         print("Sending blood from pathology with state", blud.state)
-        self.transport_manager.receive(blud)
+        self.transport_manager.receive(blud, None)
         self.transport_manager.dispatchBlood()
         #self.transport_manager.receive
         #self.transport_manager.receive(blud) # Destination storage
         #self.transport_manager.dispatch()
 
     def verify(self,blood):
-        print("verify: ", blood.state)
+        #print("verify: ", blood.state)
         if (blood.get_state()==blood_state.unverified):
             print("Blood is being verfied")
-            for i in range(random.randint(0,5)):
+            for i in range(random.randint(2,5)):
                 print(".")
                 time.sleep(1)
             randint = random.randint(0,3)
