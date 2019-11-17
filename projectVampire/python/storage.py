@@ -37,7 +37,9 @@ class storage :
 
     # Stores blood and sorts according to expiry
     def storeBlood(self, blood):
-        index = self.findIndex(blood.type, blood.rhesus)
+        print("Blood has been stored")
+        return # seems to be some issues here that need fixing #TODO
+        index = self.findIndex(blood.blood_type, blood.rhesus)
         prevSize = len(self._bloodStorage[index])
         newArray = []
         i = 0
@@ -49,7 +51,7 @@ class storage :
         insertionSort(self._bloodStorage[index])
 
     def accept(self,blood):
-        print("Blood arrived")
+        print("**Blood arrived at storage**")
         self.storeBlood(blood)
 
     # Discard expired blood

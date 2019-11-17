@@ -10,11 +10,11 @@ class recipient:
 		self.node = None
 
 	def accept(self,blood):
-		print("Recieved blood")
+		print("**Recipient has recieved blood**")
 		#print("Recieved blood with type",blood.get_blood_type())
 
 	def setTransportManager(self, tman):
 		self.setTransportManager = tman
-		
+
 	def setNode(self, node):
 		self.node = node

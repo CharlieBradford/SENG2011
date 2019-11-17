@@ -5,6 +5,7 @@ from system import system
 
 donor_db = {}
 system = system()
+system.initSys()
 
 while True:
     command = input(">")

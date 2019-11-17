@@ -48,7 +48,19 @@ class blood:
         assert(self.state == blood_state.unverified)
         
 
-
+    def stateToNum(self, state):
+        if state == blood_state.unsafe:
+            return -1
+        if state == blood_state.unverified:
+            return 0
+        if state == blood_state.verified:
+            return 1
+        if state == blood_state.storage:
+            return 2
+        if state == blood_state.dispatched:
+            return 3
+        if state == blood_state.delivered:
+            return 4
 
     def getExpiryTime(self):
         return self._expiry_time
@@ -58,15 +70,15 @@ class blood:
         assert(self.state==blood_state.unverified)
         assert(self.valid())
 
-        if (safe(curr_time) and accepted):
+        if (self.safe(curr_time) and accepted):
             self.state = blood_state.verified
         else:
             self.state=blood_state.unsafe
 
-        self.type=determined_type
+        self.blood_type=determined_type
         self.rhesus = rhesus_in
 
-        assert (state == blood_state.verified if (self.safe(curr_time) and accepted) else state==blood_state.unsafe)
+        assert (self.state == blood_state.verified if (self.safe(curr_time) and accepted) else state==blood_state.unsafe)
         assert(self.blood_type==determined_type)
         assert(self.rhesus==rhesus_in)
 
@@ -74,33 +86,33 @@ class blood:
         assert(self.Valid())
         assert(self.state==blood_state.verified)
 
-        if (safe(curr_time)):
+        if (self.safe(curr_time)):
             self.state = blood_state.storage
         else:
             self.state=blood_state.unsafe
 
-        assert (self.state == blood_state.storage if safe(curr_time) else state==blood_state.unsafe)
+        assert (self.state == blood_state.storage if self.safe(curr_time) else state==blood_state.unsafe)
 
     def dispatch_blood(self,curr_time):
         assert(self.Valid())
         assert(self.state==blood_state.storage)
 
-        if (safe(curr_time)):
+        if (self.safe(curr_time)):
             self.state = blood_state.dispatched
         else:
             self.state=blood_state.unsafe
 
-        assert(state == blood_state.dispatched if safe(curr_time) else state == blood_state.unsafe)
+        assert(state == blood_state.dispatched if self.safe(curr_time) else state == blood_state.unsafe)
 
     def deliver_blood(self,curr_time):
         assert (self.Valid())
         assert (self.state == blood_state.dispatched)
-        if (safe(curr_time)):
+        if (self.safe(curr_time)):
             self.state = blood_state.delivered
         else:
             self.state = blood_state.unsafe
 
-        assert(self.state == blood_state.delivered if safe(curr_time) else self.state==blood_state.unsafe)
+        assert(self.state == blood_state.delivered if self.safe(curr_time) else self.state==blood_state.unsafe)
     
     # Rejection of blood for any reason - rejected by pathology, lost, expired
     def reject_blood(self):
@@ -114,16 +126,17 @@ class blood:
 
 
     def get_state(self):
-        return self._state
+        return self.state
 
     # Functions like a predicate.
     # Returns false if the state is invalid. (Something has gone wrong somewhere so don't trust the blood
     def valid(self):
-        if not -1<= self._state <=4:
+        if not -1<= self.stateToNum(self.state) <=4:
             return False
+        return True
         
     def expired(self,curr_time):
-        return curr_time>self._expiry_time
+        return curr_time>self.expiry_time
 
     def safe(self,curr_time):
-        return 0<=self._state<=4 and not self.expired(curr_time)
+        return 0<=self.stateToNum(self.state)<=4 and not self.expired(curr_time)

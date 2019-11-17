@@ -64,10 +64,10 @@ class transportationRoute:
 
 
 	# BFS traversal
-	def generatePath(self, src):
+	def generateRoute(self, src):
 		pred = [list() for i in range(len(self._world))]
 		dist = [-1] * len(self._world)
-		print(src.name)
+		#print(src.name)
 		dist[src.name] = 0
 		toCheck = [src]
 
@@ -87,8 +87,8 @@ class transportationRoute:
 		blood = bloodTup[0]
 		dest = bloodTup[1]
 		#assert isinstance(dest, recipient)
-		print(type(dest.locale.locale).__name__)
-		path, dist = self.generatePath(source)
+		#print(type(dest.locale.locale).__name__)
+		path, dist = self.generateRoute(source)
 
 		curr = dest
 		final = []
@@ -104,25 +104,10 @@ class transportationRoute:
 			print("Sending blood to", node.name, ", will take", round(dist[node.name]-prevTime,1),"seconds")
 			time.sleep(round(dist[node.name]-prevTime,1))
 			prevTime = dist[node.name]
-			#print(node.name, dist[node.name])
 		
 
-		#dest.recieve(blood)
 		dest.locale.arrivalAccept(blood)
-		#print(type(dest.local).__name__)
-		#if (type(dest.locale.locale).__name__ == "storage"):
-	#		dest.locale.recieve(blood)
-	#		dest.locale.locale.storeBlood(blood)
-	#		print("Blood arrived at storage")
-	#	elif (type(dest.locale.locale).__name__ == "recipient"):
-	#		dest.locale.locale.accept(blood)
-	#		print("Blood arrived at recipient")
-	#	elif (type(dest.locale.locale).__name__ == "pathology"):
-	#		dest.locale.locale.accept(blood)
-	#		print("Blood arrived at pathology")
-	##	elif (type(dest.locale.locale).__name__ == "hospital"):
-	#		dest.locale.locale.accept(blood)
-	#		print("Blood arrived at pathology")
+
 # Testing
 
 # Creating nodes with transportNode(name of node, x value, y value)

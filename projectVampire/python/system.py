@@ -5,6 +5,7 @@ from hospital import hospital
 from transportationManager import transportationManager
 from transportationRoute import transportNode, transportationRoute
 from blood import blood
+from blood import blood_state
 from pathology import pathology
 from storage import storage
 from recipient import recipient
@@ -20,80 +21,81 @@ class system:
 	# storage = storage("storage","somewhere")
 
 
-	# Transport nodes
-	node0 = transportNode(0,1,5,None)
-	node1 = transportNode(1,5,6,None)
-	node2 = transportNode(2,5,1,None)
-	node3 = transportNode(3,8,1,None)
-	node4 = transportNode(4,8,6,None)
-	node5 = transportNode(5,5,9,None)
+	def initSys(self):
+		# Transport nodes
+		self.node0 = transportNode(0,1,5,None)
+		self.node1 = transportNode(1,5,6,None)
+		self.node2 = transportNode(2,5,1,None)
+		self.node3 = transportNode(3,8,1,None)
+		self.node4 = transportNode(4,8,6,None)
+		self.node5 = transportNode(5,5,9,None)
 
-	# Node connections
-	node0.addConnection(node5)
-	node0.addConnection(node1)
+		# Node connections
+		self.node0.addConnection(self.node5)
+		self.node0.addConnection(self.node1)
 
-	node1.addConnection(node0)
-	node1.addConnection(node4)
-	node1.addConnection(node2)
+		self.node1.addConnection(self.node0)
+		self.node1.addConnection(self.node4)
+		self.node1.addConnection(self.node2)
 
-	node2.addConnection(node1)
-	node2.addConnection(node3)
+		self.node2.addConnection(self.node1)
+		self.node2.addConnection(self.node3)
 
-	node3.addConnection(node2)
-	node3.addConnection(node4)
+		self.node3.addConnection(self.node2)
+		self.node3.addConnection(self.node4)
 
-	node4.addConnection(node3)
-	node4.addConnection(node1)
-	node4.addConnection(node5)
+		self.node4.addConnection(self.node3)
+		self.node4.addConnection(self.node1)
+		self.node4.addConnection(self.node5)
 
-	node5.addConnection(node4)
-	node5.addConnection(node0)
+		self.node5.addConnection(self.node4)
+		self.node5.addConnection(self.node0)
 
-	# Users
-	clinic = clinic("Clinic_Name",6,0)
-	clinicTransportManager = transportationManager(clinic)
-	clinic.setTransportManager(clinicTransportManager)
-	clinicNode = transportNode(7, clinic.Xcoordinate, clinic.Ycoordinate,clinicTransportManager)
-	clinicTransportManager.setNode(clinicNode)
-	clinicNode.addConnection(node2)
-	node2.addConnection(clinicNode)
+		# Users
+		self.clinic = clinic("Clinic_Name",6,0)
+		self.clinicTransportManager = transportationManager(self.clinic, self)
+		self.clinic.setTransportManager(self.clinicTransportManager)
+		self.clinicNode = transportNode(7, self.clinic.Xcoordinate, self.clinic.Ycoordinate,self.clinicTransportManager)
+		self.clinicTransportManager.setNode(self.clinicNode)
+		self.clinicNode.addConnection(self.node2)
+		self.node2.addConnection(self.clinicNode)
 
-	hosp = hospital("Hospital_Name",0,6)
-	hospitalTransportManager = transportationManager(hosp)
-	hosp.setTransportManager(hospitalTransportManager)
-	hospitalNode = transportNode(6,hosp.Xcoordinate,hosp.Ycoordinate,hospitalTransportManager)
-	hospitalTransportManager.setNode(hospitalNode)
-	hospitalNode.addConnection(node0)
-	node0.addConnection(hospitalNode)
+		self.hosp = hospital("Hospital_Name",0,6)
+		self.hospitalTransportManager = transportationManager(self.hosp,self)
+		self.hosp.setTransportManager(self.hospitalTransportManager)
+		self.hospitalNode = transportNode(6,self.hosp.Xcoordinate,self.hosp.Ycoordinate,self.hospitalTransportManager)
+		self.hospitalTransportManager.setNode(self.hospitalNode)
+		self.hospitalNode.addConnection(self.node0)
+		self.node0.addConnection(self.hospitalNode)
 
-	recipientHospital = recipient("Recipient_name", 6,12)
-	recipientHospital.setTransportManager(recipientHospital)
-	recipientTransportManager = transportationManager(recipientHospital)
-	recipientNode = transportNode(8, recipientHospital.Xcoordinate, recipientHospital.Ycoordinate,recipientTransportManager)
-	recipientTransportManager.setNode(recipientNode)
-	recipientNode.addConnection(node5)
-	node5.addConnection(recipientNode)
+		self.recipientHospital = recipient("Recipient_name", 6,12)
+		self.recipientHospital.setTransportManager(self.recipientHospital)
+		self.recipientTransportManager = transportationManager(self.recipientHospital,self)
+		self.recipientNode = transportNode(8, self.recipientHospital.Xcoordinate, self.recipientHospital.Ycoordinate,self.recipientTransportManager)
+		self.recipientTransportManager.setNode(self.recipientNode)
+		self.recipientNode.addConnection(self.node5)
+		self.node5.addConnection(self.recipientNode)
 
-	store = storage("Storage",6,1)
-	storeTransportManager = transportationManager(store)
-	store.setTransportManager(storeTransportManager)
-	storeNode = transportNode(9,6,1,storeTransportManager)
-	storeTransportManager.setNode(storeNode)
-	storeNode.addConnection(node2)
-	node2.addConnection(storeNode)
+		self.store = storage("Storage",6,1)
+		self.storeTransportManager = transportationManager(self.store,self)
+		self.store.setTransportManager(self.storeTransportManager)
+		self.storeNode = transportNode(9,6,1,self.storeTransportManager)
+		self.storeTransportManager.setNode(self.storeNode)
+		self.storeNode.addConnection(self.node2)
+		self.node2.addConnection(self.storeNode)
 
 
-	patho = pathology()
-	pathoTransportManager = transportationManager(patho)
-	patho.setTransportManager(pathoTransportManager)
-	patho.addStorage(store)
-	pathoNode = transportNode(10,5,8,pathoTransportManager)
-	pathoTransportManager.setNode(pathoNode)
-	pathoNode.addConnection(node5)
-	node5.addConnection(pathoNode)
+		self.patho = pathology()
+		self.pathoTransportManager = transportationManager(self.patho,self)
+		self.patho.setTransportManager(self.pathoTransportManager)
+		self.patho.addStorage(self.store)
+		self.pathoNode = transportNode(10,5,8,self.pathoTransportManager)
+		self.pathoTransportManager.setNode(self.pathoNode)
+		self.pathoNode.addConnection(self.node5)
+		self.node5.addConnection(self.pathoNode)
 
-	world = [node0,node1,node2,node3,node4,node5,clinicNode,hospitalNode,recipientNode,storeNode,pathoNode]
-	routingSystem = transportationRoute(world)
+		self.world = [self.node0,self.node1,self.node2,self.node3,self.node4,self.node5,self.clinicNode,self.hospitalNode,self.recipientNode,self.storeNode,self.pathoNode]
+		self.routingSystem = transportationRoute(self.world)
 
 	# example of sending blood to a hosptal node from clinic node
 	#bld = [blood(50), recipientNode]
@@ -129,14 +131,14 @@ class system:
 
 	def ClinicRoute(self, clinic):
 		toRoute = self.clinic.obtainBlood()
-		print(toRoute)
+		#print(toRoute)
 		if len(toRoute) == 0:
-			print("no blood to send")
+			print("No blood to send")
 		else:
 			for blood in toRoute:
-				print("Routing", blood)
-				clinic.transportManager.receive(blood, self)
-				clinic.transportManager.dispatchBlood(self.routingSystem)
+				#print("Routing", blood)
+				self.clinic.transportManager.receive(blood)
+				self.clinic.transportManager.dispatchBlood()
 		#TODO: fix transportationmanager dispatch thingy across multiple parts
 
 		#pathology.accept_blood(self.transportationManager.dispatch(blood,troute))
@@ -148,5 +150,19 @@ class system:
 		#TODO/TO ASK: storage and recv
 
 
-	def getPathoNode(self):
-		return self.pathoNode
+	def getRequiredNode(self, blood):
+		tNode = None
+		#print("State", blood.state)
+		if blood.state == blood_state.unverified:
+			# needs to be verified
+			tNode = self.pathoNode # need to dynamically choose 'best' node of destination type, do this in transportationRoute
+		elif blood.state == blood_state.storage:
+			# needs to be sent to recipient
+			tNode = self.recipientNode
+		else:
+			# needs to be stored
+			tNode = self.storeNode
+		return tNode
+
+	def getRoutingSys(self):
+		return self.routingSystem

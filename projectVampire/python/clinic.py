@@ -18,7 +18,7 @@ class clinic:
         doner = donordb[donor_id]
         if doner.donation_allowed(curr_time):
             blud = doner.collect_blood(curr_time)
-            print("Blood collected")
+            print("Blood successfully collected")
             self.blood.append(blud)
             return blud
         else:
