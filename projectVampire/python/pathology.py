@@ -35,7 +35,7 @@ class pathology:
             rhesus = bool(random.randint(0,1))
             accepted = True # make this fail on occasion
             if (accepted):
-                print("Blood has been verified and ACCEPTED")
+                print("Blood has been verified and ACCEPTED, Type: ",blood_type," ",rhesus)
             else:
                 print("Blood has been verified and REJECTED")
             blood.verify_blood(time_sec.get_now(),accepted,blood_type,rhesus)

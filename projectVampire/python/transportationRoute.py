@@ -102,7 +102,7 @@ class transportationRoute:
 		prevTime = 0
 		for node in final[1::]:
 			print("Sending blood to", node.name, ", will take", round(dist[node.name]-prevTime,1),"seconds")
-			time.sleep(round(dist[node.name]-prevTime,1))
+			# time.sleep(round(dist[node.name]-prevTime,1))
 			prevTime = dist[node.name]
 		
 

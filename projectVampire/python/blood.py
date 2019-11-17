@@ -63,7 +63,7 @@ class blood:
             return 4
 
     def getExpiryTime(self):
-        return self._expiry_time
+        return self.expiry_time
 
     # All transition methods accept curr_time as an int
     def verify_blood(self,curr_time,accepted,determined_type,rhesus_in):

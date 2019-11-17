@@ -146,7 +146,7 @@ class system:
 		#TODO : patho send to storage to finalise user journey
 
 	def RequestBlood(self,recipient,blood_type,rhesus):
-		self.storage.serviceRequest(self, blood_type, rhesus, recipient)
+		self.store.serviceRequest(blood_type, rhesus, recipient)
 		#TODO/TO ASK: storage and recv
 
 

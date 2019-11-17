@@ -1,6 +1,6 @@
 # Used to deal with time
 from datetime import datetime
-
+from insertionSort import *
 # Own queue in dafny, verify that queues are sorted
 
 class storage :
@@ -38,15 +38,15 @@ class storage :
     # Stores blood and sorts according to expiry
     def storeBlood(self, blood):
         print("Blood has been stored")
-        return # seems to be some issues here that need fixing #TODO
+        # return # seems to be some issues here that need fixing #TODO
         index = self.findIndex(blood.blood_type, blood.rhesus)
         prevSize = len(self._bloodStorage[index])
         newArray = []
         i = 0
         while i < prevSize:
-            newArray[i] = self._bloodStorage[index][i]
+            newArray.append(self._bloodStorage[index][i])
             i = i + 1
-        newArray[prevSize] = blood
+        newArray.append(blood)
         self._bloodStorage[index] = newArray
         insertionSort(self._bloodStorage[index])
 
@@ -71,8 +71,12 @@ class storage :
     # Gets appropriate blood packet from storage and notifies transport to send it to destination
     def serviceRequest(self, type, rh, dest):
         index = self.findIndex(type, rh)
+
         blood = self.pop(index)
-        self.notifyTransport(blood, dest)
+        if (blood==None):
+            print("No blood available")
+        else:
+            self.notifyTransport(blood, dest)
 
     # Gives blood to transport so that they can prepare to dispatch it to the destination
     def notifyTransport(self, blood, dest):
@@ -81,6 +85,7 @@ class storage :
     # Helper: Remove head of array and return it
     def pop(self, index):
         a = self._bloodStorage[index]
+        print()
         b = a[0]
         newArray = []
         i = 0

@@ -84,10 +84,10 @@ def insertionSort(toSort, toMatch):
 
 
 # Testing
-b1 = blood(1)
-b2 = blood(2)
-b3 = blood(3)
-blood = [b1,b2,b3]
-nums = [b1.getExpiryTime(),b2.getExpiryTime(),b3.getExpiryTime()]
-insertionSort(nums, blood)
-print(nums)
+# b1 = blood(1)
+# b2 = blood(2)
+# b3 = blood(3)
+# blood = [b1,b2,b3]
+# nums = [b1.getExpiryTime(),b2.getExpiryTime(),b3.getExpiryTime()]
+# insertionSort(nums, blood)
+# print(nums)
