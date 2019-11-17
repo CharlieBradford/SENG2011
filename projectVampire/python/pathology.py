@@ -3,8 +3,11 @@ from random import random
 from time_sec import time_sec
 
 class pathology:
-    def __init__(self,transport_manager):
+    def addTransportationManager(self,transport_manager):
         self.transport_manager=transport_manager
+    
+    def addStorage(self,storage):
+        self.storage = storage
 
     def accept(self,blood):
         blud = self.verify(blood)
