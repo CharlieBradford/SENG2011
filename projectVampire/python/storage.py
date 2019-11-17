@@ -16,19 +16,24 @@ class storage :
     # ON_blood = 7
 
     # Constructor
-    def __init__(self, name, location):
+    def __init__(self, name, x, y):
         self._name = name
-        self._location = location
+        self.Xcoordinate = x
+        self.Ycoordinate = y
         self._bloodStorage = []
         i = 0
         while i < 8:
-            self._bloodStorage[i] = []
+            self._bloodStorage.append([])
             i = i + 1
-        self._transManager = None
+        self.transportManager = None
+        self.node = None
+
+    def setNode(self, node):
+        self.node = node
 
     # Adds a transportation manager
-    def addTransportationManager(self, manager):
-        self._transManager = manager
+    def setTransportManager(self, tman):
+        self.setTransportManager = tman
 
     # Stores blood and sorts according to expiry
     def storeBlood(self, blood):
@@ -44,6 +49,7 @@ class storage :
         insertionSort(self._bloodStorage[index])
 
     def accept(self,blood):
+        print("Blood arrived")
         self.storeBlood(blood)
 
     # Discard expired blood

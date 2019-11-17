@@ -1,6 +1,7 @@
 import math
 import sys
 import time
+from recipient import recipient
 MAX_DIST=20
 
 
@@ -11,7 +12,7 @@ class transportNode:
 	   self._y = y
 	   self.name = name
 	   self._connected = []
-	   self._locale = locale
+	   self.locale = locale
 
 	def getX(self):
 		return self._x
@@ -66,7 +67,7 @@ class transportationRoute:
 	def generatePath(self, src):
 		pred = [list() for i in range(len(self._world))]
 		dist = [-1] * len(self._world)
-
+		print(src.name)
 		dist[src.name] = 0
 		toCheck = [src]
 
@@ -85,6 +86,8 @@ class transportationRoute:
 	def sendBlood(self, bloodTup, source):
 		blood = bloodTup[0]
 		dest = bloodTup[1]
+		#assert isinstance(dest, recipient)
+		print(type(dest.locale.locale).__name__)
 		path, dist = self.generatePath(source)
 
 		curr = dest
@@ -102,10 +105,24 @@ class transportationRoute:
 			time.sleep(round(dist[node.name]-prevTime,1))
 			prevTime = dist[node.name]
 			#print(node.name, dist[node.name])
-		print("Blood has arrived at destination")
+		
 
 		#dest.recieve(blood)
-
+		dest.locale.arrivalAccept(blood)
+		#print(type(dest.local).__name__)
+		#if (type(dest.locale.locale).__name__ == "storage"):
+	#		dest.locale.recieve(blood)
+	#		dest.locale.locale.storeBlood(blood)
+	#		print("Blood arrived at storage")
+	#	elif (type(dest.locale.locale).__name__ == "recipient"):
+	#		dest.locale.locale.accept(blood)
+	#		print("Blood arrived at recipient")
+	#	elif (type(dest.locale.locale).__name__ == "pathology"):
+	#		dest.locale.locale.accept(blood)
+	#		print("Blood arrived at pathology")
+	##	elif (type(dest.locale.locale).__name__ == "hospital"):
+	#		dest.locale.locale.accept(blood)
+	#		print("Blood arrived at pathology")
 # Testing
 
 # Creating nodes with transportNode(name of node, x value, y value)

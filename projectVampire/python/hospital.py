@@ -6,9 +6,11 @@ class hospital:
 
     def __init__(self, name, x, y):
         self.name = name
-        self.pathology = pathology(self)
+        self.pathology = pathology()
         self.Xcoordinate = x
         self.Ycoordinate = y
+        self.transportManager = None
+        self.node = None
 
 
     def collect_blood(self,donordb,donor_id,curr_time):
@@ -24,3 +26,9 @@ class hospital:
         else:
             print("Cannot collect blood. Too close to previous collection")
             print(int(doner.time_remaining(curr_time)),"seconds until you can donate again")
+
+    def setTransportManager(self, tman):
+        self.transportManager = tman
+
+    def setNode(self, node):
+        self.node = node
