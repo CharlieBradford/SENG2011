@@ -115,7 +115,6 @@ class storage :
 
     # Helper: Returns the index that is storing the required blood type
     def findIndex(self, type, rh):
-        print("FINDING INDEX: type = "+type)
         if type == "O" and rh == True:
             return 0
         elif type == "A" and rh == True:
