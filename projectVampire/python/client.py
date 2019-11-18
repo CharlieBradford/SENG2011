@@ -7,6 +7,9 @@ donor_db = {}
 system = system()
 system.initSys()
 
+print("Welcome to the Project Vampire system")
+print("Enter \"help\" for assistance on the available commands")
+
 while True:
     command = input(">")
     splitlist = command.split()
@@ -47,5 +50,21 @@ while True:
             continue  
         system.RequestBlood(splitlist[1],splitlist[2],rh)
 
+    elif len(splitlist) == 1 and splitlist[0] == 'help':
+        print("")
+        print("Commands:")
+        print("")
+        print("clinic collect [donor_name]                     - Collect blood from [donor_name] at a clinic")
+        print("clinic send                                     - Dispatches all blood from clinic to pathology for verification, then to storage")
 
+        print("hospital collect [donor_name]                   - Collect blood from [donor_name] at a hospital (has its own pathology)")
+        print("hospital send                                   - Dispatches all blood from hospital to storage")
+
+        print("request [recipient] [blood_type] [blood_rhesus] - Make a request for a certain type of blood and have it delivered if available")
+
+        print("")
+
+    else:
+        print("Command not recognised")
+        print("Enter \"help\" for assistance on the available commands")
 

@@ -41,7 +41,7 @@ class blood:
         assert(seconds_in>0)
 
         self.collection_time=seconds_in
-        self.expiry_time=seconds_in + 30
+        self.expiry_time=seconds_in + 60
         self.state = blood_state.unverified
 
         assert(self.collection_time>=0 and self.collection_time==seconds_in)
