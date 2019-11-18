@@ -41,7 +41,7 @@ class blood:
         assert(seconds_in>0)
 
         self.collection_time=seconds_in
-        self.expiry_time=seconds_in + 604800
+        self.expiry_time=seconds_in + 30
         self.state = blood_state.unverified
 
         assert(self.collection_time>=0 and self.collection_time==seconds_in)
@@ -69,50 +69,76 @@ class blood:
     def verify_blood(self,curr_time,accepted,determined_type,rhesus_in):
         assert(self.state==blood_state.unverified)
         assert(self.valid())
+        return_val=None
 
         if (self.safe(curr_time) and accepted):
             self.state = blood_state.verified
+            return_val=True
         else:
             self.state=blood_state.unsafe
+            return_val=False
 
         self.blood_type=determined_type
         self.rhesus = rhesus_in
 
-        assert (self.state == blood_state.verified if (self.safe(curr_time) and accepted) else state==blood_state.unsafe)
+        
+        assert (return_val==True if (self.safe(curr_time) and accepted) else return_val==False)
+        assert (self.state == blood_state.verified if (self.safe(curr_time) and accepted) else self.state==blood_state.unsafe)
         assert(self.blood_type==determined_type)
         assert(self.rhesus==rhesus_in)
+        return return_val
 
     def store_blood(self,curr_time):
-        assert(self.Valid())
+        assert(self.valid())
         assert(self.state==blood_state.verified)
+
+        return_val=None
 
         if (self.safe(curr_time)):
             self.state = blood_state.storage
+            return_val=True
         else:
             self.state=blood_state.unsafe
+            return_val=False
 
-        assert (self.state == blood_state.storage if self.safe(curr_time) else state==blood_state.unsafe)
+        assert (return_val==True if (self.safe(curr_time)) else return_val==False)
+        assert (self.state == blood_state.storage if self.safe(curr_time) else self.state==blood_state.unsafe)
+        return return_val
 
     def dispatch_blood(self,curr_time):
-        assert(self.Valid())
+        assert(self.valid())
         assert(self.state==blood_state.storage)
+
+        return_val=None
 
         if (self.safe(curr_time)):
             self.state = blood_state.dispatched
+            return_val=True
         else:
             self.state=blood_state.unsafe
+            return_val=False
 
-        assert(state == blood_state.dispatched if self.safe(curr_time) else state == blood_state.unsafe)
+        assert (return_val==True if (self.safe(curr_time)) else return_val==False)
+        assert (self.state == blood_state.dispatched if self.safe(curr_time) else self.state == blood_state.unsafe)
+        return return_val
 
     def deliver_blood(self,curr_time):
-        assert (self.Valid())
+        assert (self.valid())
         assert (self.state == blood_state.dispatched)
+
+        return_val=None
+
         if (self.safe(curr_time)):
             self.state = blood_state.delivered
+            return_val=True
         else:
             self.state = blood_state.unsafe
+            return_val=False
 
+
+        assert (return_val==True if (self.safe(curr_time)) else return_val==False)
         assert(self.state == blood_state.delivered if self.safe(curr_time) else self.state==blood_state.unsafe)
+        return return_val
     
     # Rejection of blood for any reason - rejected by pathology, lost, expired
     def reject_blood(self):

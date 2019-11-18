@@ -1,5 +1,6 @@
 from insertionSort import *
 from blood import blood 
+from time_sec import time_sec
 
 class storage :
 
@@ -34,9 +35,10 @@ class storage :
         self.transportManager = manager
 
     # Stores blood and sorts according to expiry
-    def storeBlood(self, blood):
-        print("Blood has been stored")
-        # return # seems to be some issues here that need fixing #TODO
+    def storeBlood(self,curr_time, blood):
+        if(not blood.store_blood(curr_time)):
+            print("Blood at storage expired. Discarding")
+            return
         index = self.findIndex(blood.blood_type, blood.rhesus)
         prevSize = len(self._bloodStorage[index])
         newArray = [None] * (prevSize+1)
@@ -57,9 +59,12 @@ class storage :
 
         insertionSort(valuearray,self._bloodStorage[index])
 
+        print("Blood has been stored")
+    
+
     def accept(self,blood):
         print("**Blood arrived at storage**")
-        self.storeBlood(blood)
+        self.storeBlood(time_sec.get_now(),blood)
 
     # Discard expired blood
     def discardBlood(self, currTime):
@@ -76,13 +81,18 @@ class storage :
             i = i + 1
         
     # Gets appropriate blood packet from storage and notifies transport to send it to destination
-    def serviceRequest(self, type, rh, dest):
+    def serviceRequest(self,curr_time, type, rh, dest):
         index = self.findIndex(type, rh)
         blood = self.pop(index)
         if blood == None:
             print("No blood of requested type available")
         else:
-            self.notifyTransport(blood, dest)
+            # Set blood to the dispatched state
+            if(blood.dispatch_blood(curr_time)):
+                self.notifyTransport(blood, dest)
+            else:
+                print("Blood packet expired. Retrying")
+                self.serviceRequest(curr_time, type, rh, dest)
 
 
     # Gives blood to transport so that they can prepare to dispatch it to the destination

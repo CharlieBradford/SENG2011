@@ -1,4 +1,5 @@
 from blood import blood
+from time_sec import time_sec
 
 class recipient:
 
@@ -10,8 +11,10 @@ class recipient:
 		self.node = None
 
 	def accept(self,blood):
-		print("**Recipient has recieved blood**")
-		#print("Recieved blood with type",blood.get_blood_type())
+		if(blood.deliver_blood(time_sec.get_now())):
+			print("**Recipient has recieved blood**")
+		else:
+			print("Expired blood arrived at recipient. Discarding")
 
 	def setTransportManager(self, tman):
 		self.setTransportManager = tman

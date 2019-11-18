@@ -140,7 +140,7 @@ class system:
 
 	def RequestBlood(self,recipient,blood_type,rhesus):
 		# need to dynamically choose the storage location to use # TODO
-		self.store.serviceRequest(blood_type, rhesus, self.recipientNode) # need to dynamically choose the recipient # TODO
+		self.store.serviceRequest(time_sec.get_now(),blood_type, rhesus, self.recipientNode) # need to dynamically choose the recipient # TODO
 		#TODO/TO ASK: storage and recv
 
 
