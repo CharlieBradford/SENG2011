@@ -17,14 +17,13 @@ class pathology:
 
     def accept(self,blood):
         print("**Blood arrived at pathology** ", blood.state)
-        blud = self.verify(blood)
-        # TODO -> Send blood back to transport
-        print("Sending blood from pathology with state", blud.state)
-        self.transport_manager.receive(blud, None)
-        self.transport_manager.dispatchBlood()
-        #self.transport_manager.receive
-        #self.transport_manager.receive(blud) # Destination storage
-        #self.transport_manager.dispatch()
+        vblood = self.verify(blood)
+        if (vblood != None):
+            print("Sending blood from pathology with state", vblood.state)
+            self.transport_manager.receive(vblood, None)
+            self.transport_manager.dispatchBlood()
+        else:
+            print("Blood at pathology is expired. Discarding")
 
     def verify(self,blood):
         #print("verify: ", blood.state)
@@ -42,8 +41,11 @@ class pathology:
                 print("Blood has been verified and ACCEPTED, Type: ",blood_type," ",rhesus)
             else:
                 print("Blood has been verified and REJECTED")
-            blood.verify_blood(time_sec.get_now(),accepted,blood_type,rhesus)
-            return blood
+            if(blood.verify_blood(time_sec.get_now(),accepted,blood_type,rhesus)):
+                return blood
+            else:
+                # Blood is expired
+                return None
 
     def setNode(self, node):
         self.node = node
