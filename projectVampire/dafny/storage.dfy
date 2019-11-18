@@ -16,14 +16,17 @@ class storage {
 
     // Attributes
     var name: string;
-    var location: string;
+    var Xcoordinate: int;
+    var Ycoordinate: int;
     var bloodStorage: array<array<blood>>;
     var transManager: transportationManager;
+    var node: Node
 
     // Constructor
-    constructor (n: string, l: string) {
+    constructor (n: string, x: int, y: int) {
         name := n;
-        location := l;
+        Xcoordinate := x;
+        Ycoordinate := y;
         bloodStorage := new array[8];
         i := 0;
         while (i < bloodStorage.length) {
@@ -31,10 +34,15 @@ class storage {
             i := i + 1;
         }
         transManager := null;
+        node := null;
+    }
+
+    method setNode(n: Node) {
+        node := n;
     }
 
     // Adds a transportation manager
-    method addTransportationManager(manager: transportationManager) {
+    method setTransportationManager(manager: transportationManager) {
         transManager := manager;
     }
 
@@ -42,7 +50,7 @@ class storage {
     method storeBlood(b: blood) {
         index := findIndex(blood.blood_type, blood.rhesus);
         var prevSize := bloodStorage[index].length;
-        var newArray := new array[newSize+1];
+        var newArray := new array[prevSize+1];
         var i := 0;
         while (i < prevSize) {
             newArray[i] := bloodStorage[index][i];
@@ -50,7 +58,15 @@ class storage {
         }
         newArray[prevSize] := blood;
         bloodStorage[index] := newArray;
-        insertionSort(bloodStorage[index]);
+
+        // Generate list of blood times
+        var valuearray := new array[bloodStorage[index].length];
+        i := 0;
+        while (i < bloodStorage[index].length) {
+            valuearray[i] := bloodStorage[index][i].getExpiryTime();
+        }
+
+        insertionSort(valuearray, bloodStorage[index]);
     }
 
     // Discard expired blood
@@ -74,22 +90,32 @@ class storage {
     method serviceRequest(t: blood_type, rh: bool, dest: string) {
         index := findIndex(t, rh);
         blood := pop(index);
-        notifyTransport(blood, dest);
+        if (blood == null) {
+            print("No blood of requested type available");
+        }
+        else {
+            notifyTransport(blood, dest);
+        }
     }
 
     // Gives blood to transport so that they can prepare to dispatch it to the destination
     method notifyTransport(b: blood, dest: string) {
         transManager.receive(b, dest);
+        transManager.dispatchBlood();
     }
 
     // Helper: Remove head of array and return it
     method pop(index: int) returns (b: blood) {
         a := bloodStorage[index];
+        if (a.length < 1) {
+            return null;
+        }
         b := a[0];
         newArray := new array[a.length-1];
         i := 0;
         while (i + 1 < a.length) {
             newArray[i] := a[i + 1];
+            i := i + 1;
         }
         bloodStorage[index] := newArray;
     }
@@ -107,28 +133,28 @@ class storage {
 
     // Helper: Returns the index that is storing the required blood type
     method findIndex(t: blood_type, rh: bool) returns (index: int) {
-        if (t == A & rh) {
+        if (t == O & rh) {
             index := 0;
         }
-        else if (t == A & !rh) {
+        else if (t == A & rh) {
             index := 1;
         }
         else if (t == B & rh) {
             index := 2;
         }
-        else if (t == B & !rh) {
+        else if (t == AB & rh) {
             index := 3;
         }
-        else if (t == AB & rh) {
+        else if (t == O & !rh) {
             index := 4;
         }
-        else if (t == AB & !rh) {
+        else if (t == A & !rh) {
             index := 5;
         }
-        else if (t == O & rh) {
+        else if (t == B & !rh) {
             index := 6;
         }
-        else if (t == O & !rh) {
+        else if (t == AB & !rh) {
             index := 7;
         }
     }
