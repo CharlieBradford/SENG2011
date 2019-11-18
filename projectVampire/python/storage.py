@@ -1,8 +1,5 @@
-# Used to deal with time
-from datetime import datetime
 from insertionSort import *
 from blood import blood 
-# Own queue in dafny, verify that queues are sorted
 
 class storage :
 
@@ -33,8 +30,8 @@ class storage :
         self.node = node
 
     # Adds a transportation manager
-    def setTransportManager(self, tman):
-        self.transportManager = tman
+    def setTransportManager(self, manager):
+        self.transportManager = manager
 
     # Stores blood and sorts according to expiry
     def storeBlood(self, blood):
@@ -42,19 +39,22 @@ class storage :
         # return # seems to be some issues here that need fixing #TODO
         index = self.findIndex(blood.blood_type, blood.rhesus)
         prevSize = len(self._bloodStorage[index])
-        newArray = []
+        newArray = [None] * (prevSize+1)
         i = 0
         while i < prevSize:
-            newArray.append(self._bloodStorage[index][i])
+            newArray[i] = self._bloodStorage[index][i]
             i = i + 1
-        newArray.append(blood)
+        newArray[prevSize] = blood
         self._bloodStorage[index] = newArray
 
 
         # Generate list of blood times
-        valuearray = []
-        for i in range(0,len(self._bloodStorage[index])):
-            valuearray.append(self._bloodStorage[index][i].getExpiryTime())
+        valuearray = [None] * (prevSize+1)
+        i = 0
+        while i < len(self._bloodStorage[index]):
+            valuearray[i] = self._bloodStorage[index][i].getExpiryTime()
+            i = i + 1
+
         insertionSort(valuearray,self._bloodStorage[index])
 
     def accept(self,blood):
@@ -79,7 +79,7 @@ class storage :
     def serviceRequest(self, type, rh, dest):
         index = self.findIndex(type, rh)
         blood = self.pop(index)
-        if (blood==None):
+        if blood == None:
             print("No blood of requested type available")
         else:
             self.notifyTransport(blood, dest)
@@ -93,7 +93,7 @@ class storage :
     # Helper: Remove head of array and return it
     def pop(self, index):
         a = self._bloodStorage[index]
-        if len(a)<1:
+        if len(a) < 1:
             return None
         b = a[0]
         newArray = [None] * (len(a)-1)
