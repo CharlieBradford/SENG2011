@@ -22,7 +22,7 @@ class hospital:
         if doner.donation_allowed(curr_time):
             blood = doner.collect_blood(curr_time)
             blood = pathology.verify(blood)
-            #print("Blood collected and verified")
+            print("Blood collected and verified")
             self.blood.append(blood)
             return blood
         else:

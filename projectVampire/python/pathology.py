@@ -28,7 +28,7 @@ class pathology:
     def verify(self,blood):
         #print("verify: ", blood.state)
         if (blood.get_state()==blood_state.unverified):
-            print("Blood is being verfied")
+            print("Blood is being verified")
             for i in range(random.randint(2,5)):
                 print(".")
                 time.sleep(1)
@@ -38,7 +38,11 @@ class pathology:
             rhesus = bool(random.randint(0,1))
             accepted = True # make this fail on occasion
             if (accepted):
-                print("Blood has been verified and ACCEPTED, Type: ",blood_type," ",rhesus)
+                if rhesus:
+                    sign = "+"
+                else:
+                    sign = "-"
+                print("Blood has been verified and ACCEPTED, Type: ",blood_type,sign)
             else:
                 print("Blood has been verified and REJECTED")
             if(blood.verify_blood(time_sec.get_now(),accepted,blood_type,rhesus)):
