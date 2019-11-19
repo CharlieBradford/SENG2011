@@ -35,35 +35,41 @@ class blood:
     blood_type = None
     rhesus = None
     
+    # Functions like a predicate.
+    # Returns false if the state is invalid. (Something has gone wrong somewhere so don't trust the blood
+    def valid(self):
+        return (self.state == blood_state.unsafe or self.state ==  blood_state.unverified or self.state == blood_state.verified or self.state == blood_state.storage or self.state == blood_state.dispatched or self.state == blood_state.delivered)
 
+    def expired(self,curr_time):
+        return curr_time>self.expiry_time
+    
+    def safe(self,curr_time):
+        return ((self.state ==  blood_state.unverified or self.state == blood_state.verified or self.state == blood_state.storage or self.state == blood_state.dispatched or self.state == blood_state.delivered) and not self.expired(curr_time))
+
+    def getExpiryTime(self):
+        expiry = self.expiry_time
+        assert(expiry == self.expiry_time)
+        return expiry
+
+
+    def get_blood_type(self):
+        if self.state>=1 and self.state<=4:
+            return (self.type,self.rhesus)
+
+    def get_state(self):
+        return self.state
 
     def __init__(self,seconds_in):
         assert(seconds_in>0)
 
         self.collection_time=seconds_in
-        self.expiry_time=seconds_in + 60
+        self.expiry_time=seconds_in + 604800
         self.state = blood_state.unverified
 
         assert(self.collection_time>=0 and self.collection_time==seconds_in)
         assert(self.state == blood_state.unverified)
-        
 
-    def stateToNum(self, state):
-        if state == blood_state.unsafe:
-            return -1
-        if state == blood_state.unverified:
-            return 0
-        if state == blood_state.verified:
-            return 1
-        if state == blood_state.storage:
-            return 2
-        if state == blood_state.dispatched:
-            return 3
-        if state == blood_state.delivered:
-            return 4
 
-    def getExpiryTime(self):
-        return self.expiry_time
 
     # All transition methods accept curr_time as an int
     def verify_blood(self,curr_time,accepted,determined_type,rhesus_in):
@@ -86,6 +92,7 @@ class blood:
         assert (self.state == blood_state.verified if (self.safe(curr_time) and accepted) else self.state==blood_state.unsafe)
         assert(self.blood_type==determined_type)
         assert(self.rhesus==rhesus_in)
+        assert(self.valid())
         return return_val
 
     def store_blood(self,curr_time):
@@ -103,6 +110,7 @@ class blood:
 
         assert (return_val==True if (self.safe(curr_time)) else return_val==False)
         assert (self.state == blood_state.storage if self.safe(curr_time) else self.state==blood_state.unsafe)
+        assert(self.valid())
         return return_val
 
     def dispatch_blood(self,curr_time):
@@ -120,6 +128,7 @@ class blood:
 
         assert (return_val==True if (self.safe(curr_time)) else return_val==False)
         assert (self.state == blood_state.dispatched if self.safe(curr_time) else self.state == blood_state.unsafe)
+        assert(self.valid())
         return return_val
 
     def deliver_blood(self,curr_time):
@@ -138,31 +147,17 @@ class blood:
 
         assert (return_val==True if (self.safe(curr_time)) else return_val==False)
         assert(self.state == blood_state.delivered if self.safe(curr_time) else self.state==blood_state.unsafe)
+        assert(self.valid())
         return return_val
     
     # Rejection of blood for any reason - rejected by pathology, lost, expired
+
     def reject_blood(self):
         self.state = blood_state.unsafe
 
         assert(self.state==blood_state.unsafe)
+        assert(self.valid())
 
-    def get_blood_type(self):
-        if self.state>=1 and self.state<=4:
-            return (self.type,self.rhesus)
-
-
-    def get_state(self):
-        return self.state
-
-    # Functions like a predicate.
-    # Returns false if the state is invalid. (Something has gone wrong somewhere so don't trust the blood
-    def valid(self):
-        if not -1<= self.stateToNum(self.state) <=4:
-            return False
-        return True
         
-    def expired(self,curr_time):
-        return curr_time>self.expiry_time
 
-    def safe(self,curr_time):
-        return 0<=self.stateToNum(self.state)<=4 and not self.expired(curr_time)
+
