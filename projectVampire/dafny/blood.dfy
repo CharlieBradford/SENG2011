@@ -23,11 +23,6 @@ class Blood{
     reads this
     {state== unsafe || state==unverified || state==verified || state==storage || state==dispatched || state==delivered}
 
-
-
-// Every function takes in the current time as an integer(Number of seconds since Unix Epoch time)
-// Theres a python class time_sec that lets us get this easily. You can write your function to similarly
-// take in curr_time and just work with that
     predicate method expired(curr_time:int)
     reads this
     {curr_time>expiry_time}
@@ -35,6 +30,36 @@ class Blood{
     predicate method safe(curr_time:int)
     reads this
     {(state==unverified || state==verified || state==storage || state==dispatched || state==delivered) && !expired(curr_time)}
+
+    method getExpiryTime() returns (expiry : int)
+    // reads this;
+    ensures expiry == expiry_time
+    {
+        expiry := expiry_time;
+        return;
+    }
+
+    method reject_blood()
+    modifies this;
+    ensures state == unsafe
+    ensures Valid()
+    {
+        state := unsafe;
+    }
+
+    method get_blood_type() returns (b_type:Blood_types,rh:bool)
+    ensures b_type==blood_type
+    ensures rh==rhesus
+    {
+        b_type := blood_type;
+        rh := rhesus;
+    }
+
+    method get_state() returns (bl_state:blood_state)
+    ensures bl_state == state
+    {
+        bl_state := state;
+    }
 
     constructor (secondsin:int)
     modifies this
@@ -54,6 +79,7 @@ class Blood{
     ensures if (safe(curr_time) && accepted) then state == verified else state==unsafe
     ensures blood_type==determined_type
     ensures rhesus == rhesus_in
+    ensures Valid()
     {
         if safe(curr_time) && accepted {
             state:=verified;
@@ -70,6 +96,7 @@ class Blood{
     requires Valid()
     requires state==verified;
     ensures if safe(curr_time) then state == storage else state==unsafe;
+    ensures Valid()
     {
         if safe(curr_time) {
             state:=storage;
@@ -83,6 +110,7 @@ class Blood{
     requires Valid()
     requires state==storage;
     ensures if safe(curr_time) then state == dispatched else state==unsafe;
+    ensures Valid()
     {
         if safe(curr_time) {
             state:=dispatched;
@@ -96,6 +124,7 @@ class Blood{
     requires Valid()
     requires state==dispatched;
     ensures if safe(curr_time) then state ==delivered else state==unsafe;
+    ensures Valid()
     {
         if safe(curr_time) {
             state:=delivered;
@@ -107,5 +136,6 @@ class Blood{
     method reject()
     modifies this
     ensures state ==unsafe;
+    ensures Valid()
     {state:=unsafe;}
 }
