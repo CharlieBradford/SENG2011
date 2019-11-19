@@ -4,7 +4,7 @@ import time
 from recipient import recipient
 import random
 MAX_DIST=20
-LOSS_CHANCE = 5
+LOSS_CHANCE = 2
 
 # locations to help simulate the path the blood will take
 class transportNode:

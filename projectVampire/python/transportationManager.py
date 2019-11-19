@@ -13,7 +13,7 @@ class transportationManager:
 		#self.locale.accept(blood)
 
 	def receive(self, blood, dest):
-		transportNode = None
+		#print("Sending blood to ", dest.name)
 		if dest == None:
 			dest = self.getBloodDest(blood) 
 		# blood is to be sent
