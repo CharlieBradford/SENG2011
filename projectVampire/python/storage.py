@@ -25,10 +25,6 @@ class storage :
             self._bloodStorage.append([])
             i = i + 1
         self.transportManager = None
-        self.node = None
-
-    def setNode(self, node):
-        self.node = node
 
     # Adds a transportation manager
     def setTransportManager(self, manager):
