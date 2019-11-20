@@ -482,7 +482,7 @@ class Storage {
     ensures forall x :: 0<=x<|bloodStorage| && x!=findIndex(b.blood_type, b.rhesus) ==> bloodStorage[x]==old(bloodStorage[x])
     ensures forall x :: 0<=x<|bloodStorage| && x!=findIndex(b.blood_type, b.rhesus) ==> multiset(bloodStorage[x][..])==multiset(old(bloodStorage[x][..]))
     // Ensures specified blood array has only had element added
-    ensures multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..]+[b])))
+    // ensures multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..]+[b])))
     {
 
         
@@ -509,7 +509,8 @@ class Storage {
         invariant |bloodStorage|==old(|bloodStorage|)
         invariant forall x :: 0<=x<old(|bloodStorage|) ==> bloodStorage[x]==old(bloodStorage[x])
         invariant forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x] !=null;
-
+        invariant newArray[..i]==bloodStorage[index][..i]
+        invariant multiset(newArray[..i])==multiset(bloodStorage[index][..i])
         {
             newArray[i] := bloodStorage[index][i];
             i := i + 1;
@@ -519,10 +520,13 @@ class Storage {
 
 
         newArray[newArray.Length-1]:=b;
-        // assert multiset(newArray[..newArray.Length-1])==(multiset(old(bloodStorage[index][..]+[b])));
-        
-        assert forall x :: 0<=x<newArray.Length-1 ==> newArray[x]==bloodStorage[index][x];
-        assert forall x :: 0<=x<newArray.Length ==> newArray[x] !=null;
+
+        assert newArray[..newArray.Length] == newArray[..];
+        assert bloodStorage[index][..bloodStorage[index].Length] == bloodStorage[index][..];
+        assert newArray[..] == bloodStorage[index][..] + [b];
+
+        // assert forall x :: 0<=x<newArray.Length-1 ==> newArray[x]==bloodStorage[index][x];
+        // assert forall x :: 0<=x<newArray.Length ==> newArray[x] !=null;
 
         // assert 0<=index<|bloodStorage|;
 
@@ -538,13 +542,14 @@ class Storage {
         invariant forall x :: 0<=x <|bloodStorage| ==> bloodStorage[x]!=null
         invariant forall x :: 0<=x<newArray.Length ==> newArray[x] !=null
         invariant forall x ::  0<=x<i ==> valuearray[x]==newArray[x].getExpiryTime()
+        // invariant newArray[..] == bloodStorage[index][..] + [b]
+        
         {
             valuearray[i] := newArray[i].getExpiryTime();
             i:=i+1;
         }
 
-        // assert multiset(newArray[..])==(multiset(old(bloodStorage[index][..]+[b])));
-
+        // assert newArray[..] == bloodStorage[index][..] + [b];
         insertionSort(valuearray, newArray);
         // assert (forall x :: 0<=x<|bloodStorage| ==> (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null));
         bloodStorage := bloodStorage[index:= newArray];
