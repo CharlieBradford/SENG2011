@@ -32,12 +32,10 @@ class Blood{
     reads this
     {(state==unverified || state==verified || state==storage || state==dispatched || state==delivered) && !expired(curr_time)}
 
-    method getExpiryTime() returns (expiry : int)
-    // reads this;
-    ensures expiry == expiry_time
+    function method getExpiryTime(): int
+    reads this;
     {
-        expiry := expiry_time;
-        return;
+        expiry_time
     }
 
     method reject_blood()
