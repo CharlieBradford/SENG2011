@@ -1,4 +1,4 @@
-from blood import blood
+from blood import blood,blood_state 
 from pathology import pathology
 from donor import donor
 
@@ -22,9 +22,9 @@ class hospital:
         if doner.donation_allowed(curr_time):
             blood = doner.collect_blood(curr_time)
             blood = pathology.verify(blood)
-            #print("Blood collected and verified")
-            self.blood.append(blood)
-            return blood
+            if blood != None:
+                self.blood.append(blood)
+                return blood
         else:
             print("Cannot collect blood. Too close to previous collection")
             print(int(doner.time_remaining(curr_time)),"seconds until you can donate again")

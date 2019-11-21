@@ -3,7 +3,7 @@ from blood import blood_state
 import random
 from time_sec import time_sec
 import time
-DISCARD_CHANCE = 10
+DISCARD_CHANCE = 50
 
 class pathology:
 
@@ -37,7 +37,7 @@ class pathology:
             blood_types = ['O','A','B','AB']
             blood_type = blood_types[randint]
             rhesus = bool(random.randint(0,1))
-            accepted = True if random.randint(0,100) > 10 else False # make this fail on occasion
+            accepted = True if random.randint(0,100) > DISCARD_CHANCE else False # make this fail on occasion
             if (accepted):
                 print("Blood has been verified and ACCEPTED, Type: ",blood_type," ",rhesus)
             else:
