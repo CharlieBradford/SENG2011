@@ -1,3 +1,7 @@
+
+// Insertion sort verification as per lecture notes
+// adapted to sort the blood objects for our system
+
 // state:
 // unsafe = -1
 // unverified = 0
@@ -121,54 +125,10 @@ reads arr2[..];
 	forall i :: 0 <= i < arr1.Length && arr2[i] != null ==> arr2[i].expiry_time == arr1[i]
 }
 
-
-//method bloodSort(toSort: array<Blood>, sortedArray: array<int>) returns (sortedBlood: array<Blood>)
-//modifies toSort;
-//requires toSort != null;
-//requires sortedArray != null;
-//requires forall x :: exists y :: 0 <= x < toSort.Length && 0 <= y < sortedArray.Length && toSort[x] != null && toSort[x].expiry_time == sortedArray[y] // requires mapping from sorted to toSort
-//requires toSort.Length == sortedArray.Length;
-//ensures sortedBlood != null;
-//ensures toSort.Length == sortedBlood.Length;
-//ensures forall x :: 0 <= x < sortedBlood.Length && sortedBlood[x] != null ==> sortedBlood[x].expiry_time == sortedArray[x]; // a mapping between sorted array an blood expiry
-//{
-//	var x := 0;
-//	var y := 0;
-//	sortedBlood := new Blood[toSort.Length]; 
-//	while x < toSort.Length 
-//	invariant 0 <= x <= toSort.Length
-//	//invariant forall i :: 0 <= i < x ==> sortedBlood[i] != null
-//	//invariant forall i :: 0 <= i < x  && sortedBlood[i] != null==> sortedBlood[i].expiry_time == sortedArray[i]
-//	{
-//		 
-//		y := 0;
-//		while y < toSort.Length 
-//			invariant 0 <= y <= toSort.Length
-//			//invariant forall i :: 0 <= i < y && toSort[i] != null && sortedBlood[i] != null && sortedBlood[i] == toSort[x] ==> i == y
-//			//invariant exists i :: 0 <= i < (y-1) && toSort[i] != null && toSort[i].expiry_time == sortedArray[i]
-//			{
-//			if (toSort[y] != null && sortedArray[x] == toSort[y].expiry_time) {
-//				sortedBlood[x] := toSort[x];
-//				toSort[y] := null; // so we don't capture this object again
-//			}
-//			y := y + 1;
-//		}	 
-//		x := x + 1;
-//	}
-//}
-
-
-
-
-
-
-
-
 method insertionSort(toSort: array<int>, toMatch: array<Blood>)
 requires toSort != null;
 requires toMatch != null;
 requires toSort.Length == toMatch.Length;
-//requires forall x :: 0 <= x < toSort.Length ==> toSort[x] != null
 requires forall x,y ::0 <= x < toSort.Length && 0 <= y < toMatch.Length && x == y  && toMatch[y] != null ==> toMatch[y].expiry_time == toSort[x];
 
 requires toSort.Length > 1;
@@ -184,25 +144,19 @@ modifies toMatch;
     invariant Sorted(toSort, 0, start); // array is sorted up to start
     invariant multiset(toSort[..]) == multiset(old(toSort[..])); // keep array the same
     invariant multiset(toMatch[..]) == multiset(old(toMatch[..]));
-    invariant forall x, y :: 0 <= x < toMatch.Length && 0 <= toSort.Length && x == y && toMatch[x] != null ==> toSort[y] == toMatch[x].expiry_time;
-    //invariant Matching(toSort, toMatch);
-    //invariant forall x :: 0 <= x < toSort.Length ==> toSort[x] != null
-    //invariant forall x :: 0 <= x < toSort.Length 
+    invariant forall x, y :: 0 <= x < toMatch.Length && 0 <= toSort.Length && x == y && toMatch[x] != null ==> toSort[y] == toMatch[x].expiry_time; // 1-1 correspondence
     {
         var end := start;
         while (end >= 1 && toSort[end-1] > toSort[end])
         invariant 0 <= end <= start; // end is within limits
-        invariant multiset(toSort[..]) == multiset(old(toSort[..])); // array stays the same
-	invariant multiset(toMatch[..]) == multiset(old(toMatch[..]));
-	//invariant Matching(toSort, toMatch);
-	//invariant forall i :: 0 <= i < toSort.Length ==> toSort[i] != null;
+        invariant multiset(toSort[..]) == multiset(old(toSort[..])); // arrays stay the same
+	    invariant multiset(toMatch[..]) == multiset(old(toMatch[..]));
         invariant forall i, j :: (0 <= i <= j <= start && j != end) ==> toSort[i] <= toSort[j]; // all values less than start are sorted
-        //invariant forall i :: (0 <= i <= start && i != end && toMatch[i] != null) ==> toSort[i] == toMatch[i].expiry_time;
-        invariant forall x, y :: 0 <= x < toMatch.Length && 0 <= toSort.Length && x == y && toMatch[x] != null ==> toSort[y] == toMatch[x].expiry_time;
+        invariant forall x, y :: 0 <= x < toMatch.Length && 0 <= toSort.Length && x == y && toMatch[x] != null ==> toSort[y] == toMatch[x].expiry_time; // 1-1 correspondence
 	{
            	var temp := toSort[end-1];
            	toSort[end-1] := toSort[end];
-            	toSort[end] := temp;
+            toSort[end] := temp;
 		
 	    	var temp2 := toMatch[end-1];
 	    	toMatch[end-1] := toMatch[end];
@@ -219,10 +173,7 @@ modifies toMatch;
 method Test()
 {
     var nums := new int[3];
-    //nums[0] := 10;
-    //nums[1] := 5;
-    //nums[2] := 1;
-    
+  
     var blood := new Blood[3];
     var temp := new Blood(10);
     blood[0] := temp; 
