@@ -3,7 +3,7 @@ from blood import blood_state
 import random
 from time_sec import time_sec
 import time
-DISCARD_CHANCE = 50
+DISCARD_CHANCE = 12
 
 class pathology:
 

@@ -68,7 +68,7 @@ class system:
 		self.hospitalNode.addConnection(self.node0)
 		self.node0.addConnection(self.hospitalNode)
 
-		self.recipientHospital = recipient("Test1", 6,12)
+		self.recipientHospital = recipient("Recipient1", 6,12)
 		self.recipientHospital.setTransportManager(self.recipientHospital)
 		self.recipientTransportManager = transportationManager(self.recipientHospital,self)
 		self.recipientNode = transportNode(8, self.recipientHospital.Xcoordinate, self.recipientHospital.Ycoordinate,self.recipientTransportManager)
@@ -76,7 +76,7 @@ class system:
 		self.recipientNode.addConnection(self.node5)
 		self.node5.addConnection(self.recipientNode)
 
-		self.recipientHospital2 = recipient("Test2", 1,12)
+		self.recipientHospital2 = recipient("Recipient2", 1,12)
 		self.recipientHospital2.setTransportManager(self.recipientHospital2)
 		self.recipientTransportManager2 = transportationManager(self.recipientHospital2,self)
 		self.recipientNode2 = transportNode(11, self.recipientHospital2.Xcoordinate, self.recipientHospital2.Ycoordinate,self.recipientTransportManager2)
@@ -159,10 +159,6 @@ class system:
 		if recNode == None:
 			print("No recipient registered as ", recipient)
 		else:
-			#print(recNode.transportManager)
-			print("Sending blood to", recNode.name)
-			#recNode = recNode.transportManager.node
-			#recNode = self.recipientNode2
 			self.store.serviceRequest(time_sec.get_now(),blood_type, rhesus, recNode) # need to dynamically choose the recipient # TODO
 
 
