@@ -405,26 +405,11 @@ class Storage {
     // reads this.shadowblood
     {|bloodStorage|==8 && forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null)}
 
-
-
-    // {|bloodStorage|==|shadowblood| && 
-    //     forall x :: 0<=x<|bloodStorage| ==> (bloodStorage[x] !=null && bloodStorage[x].Length==|shadowblood[x]| && 
-    //         forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]==shadowblood[x][y])
-    // }
-
-    // predicate eightBloodTypes(a: seq<array<Blood>>)
-    // // requires a != null
-    // reads a
-    // {
-    //     |a| == 8
-    // }
-
     // Constructor
     constructor (n: string, x: int, y: int)
     modifies this
     ensures name == n && Xcoordinate == x && Ycoordinate == y && transManager == null
-    // ensures eightBloodTypes(bloodStorage)
-    // ensures storageInitialised(bloodStorage)
+
     ensures Valid()
     {
         name := n;
@@ -441,24 +426,9 @@ class Storage {
         var h : array<Blood> := new Blood[0];
 
         bloodStorage := [a,b,c,d,e,f,g,h];
-        var a1: seq<Blood> := [];
-        var a2: seq<Blood> := [];
-        var a3: seq<Blood> := [];
-        var a4: seq<Blood> := [];
-        var a5: seq<Blood> := [];
-        var a6: seq<Blood> := [];
-        var a7: seq<Blood> := [];
-        var a8: seq<Blood> := [];
-        shadowblood := [a1,a2,a3,a4,a5,a6,a7,a8];
-
         transManager := null;
     }
 
-    // predicate storageInitialised(a: seq<array<Blood>>)
-    // reads a
-    // {
-    //     forall k :: 0 <= k < |a| ==> a[k] != null && forall j :: 0<=j<a[k].Length ==> a[k][j] != null
-    // }
 
 
     // Adds a transportation manager
@@ -469,8 +439,6 @@ class Storage {
         transManager := manager;
     }
 
-    // ISSUE: For some reason the error is that bloodStorage might be null,
-    //        despite my requires bloodStorage != null
     
     // Stores blood and sorts according to expiry
     method storeBlood(b: Blood)
@@ -482,17 +450,16 @@ class Storage {
     ensures forall x :: 0<=x<|bloodStorage| && x!=findIndex(b.blood_type, b.rhesus) ==> bloodStorage[x]==old(bloodStorage[x])
     ensures forall x :: 0<=x<|bloodStorage| && x!=findIndex(b.blood_type, b.rhesus) ==> multiset(bloodStorage[x][..])==multiset(old(bloodStorage[x][..]))
     // Ensures specified blood array has only had element added
-    // ensures multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..]+[b])))
+    ensures multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..]+[b])))
     {
 
-        
-
         var index := findIndex(b.blood_type, b.rhesus);
-        assert 0<=index<|bloodStorage|;
+        // assert 0<=index<|bloodStorage|;
         // Update real array
 
         var prevSize := bloodStorage[index].Length;
         var newArray := new Blood[prevSize+1];
+        var valuearray := new int[newArray.Length];
         var i := 0;
 
         assert forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x] !=null;
@@ -501,68 +468,23 @@ class Storage {
         decreases prevSize - i
         invariant i - 1 < prevSize
         invariant bloodStorage==old(bloodStorage)
-        invariant forall x :: 0<=x <|bloodStorage| ==> bloodStorage[x]!=null
-        invariant 0<=index<|bloodStorage| && bloodStorage[index]!=null
-        invariant forall k :: 0 <= k < i<=bloodStorage[index].Length ==> newArray[k] == bloodStorage[index][k]
-        invariant forall k :: 0<=k<i<=bloodStorage[index].Length ==> newArray[k]==bloodStorage[index][k]
-        // invariant forall x :: 0<=x<|bloodStorage| ==> (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null)
-        invariant |bloodStorage|==old(|bloodStorage|)
-        invariant forall x :: 0<=x<old(|bloodStorage|) ==> bloodStorage[x]==old(bloodStorage[x])
-        invariant forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x] !=null;
-        invariant newArray[..i]==bloodStorage[index][..i]
-        invariant multiset(newArray[..i])==multiset(bloodStorage[index][..i])
+        invariant forall x ::  0<=x<i ==> newArray[x]!=null
+        invariant forall x ::  0<=x<i ==> valuearray[x]==newArray[x].getExpiryTime()
+        invariant  newArray[..i] == bloodStorage[index][..i]
         {
             newArray[i] := bloodStorage[index][i];
+            valuearray[i] := newArray[i].getExpiryTime();
             i := i + 1;
         }
 
-
-
-
         newArray[newArray.Length-1]:=b;
+        valuearray[newArray.Length-1]:=b.getExpiryTime();
 
-        assert newArray[..newArray.Length] == newArray[..];
-        assert bloodStorage[index][..bloodStorage[index].Length] == bloodStorage[index][..];
+        assert newArray[..prevSize] == bloodStorage[index][..];
         assert newArray[..] == bloodStorage[index][..] + [b];
 
-        // assert forall x :: 0<=x<newArray.Length-1 ==> newArray[x]==bloodStorage[index][x];
-        // assert forall x :: 0<=x<newArray.Length ==> newArray[x] !=null;
-
-        // assert 0<=index<|bloodStorage|;
-
-        var valuearray := new int[newArray.Length];
-        i := 0;
-        while (i < newArray.Length)
-        invariant valuearray.Length == newArray.Length
-        invariant i < newArray.Length+1
-        invariant bloodStorage==old(bloodStorage)
-        invariant |bloodStorage|==old(|bloodStorage|)
-        invariant 0<=index<|bloodStorage|
-        // invariant forall x :: 0<=x<|bloodStorage| ==> (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null)
-        invariant forall x :: 0<=x <|bloodStorage| ==> bloodStorage[x]!=null
-        invariant forall x :: 0<=x<newArray.Length ==> newArray[x] !=null
-        invariant forall x ::  0<=x<i ==> valuearray[x]==newArray[x].getExpiryTime()
-        // invariant newArray[..] == bloodStorage[index][..] + [b]
-        
-        {
-            valuearray[i] := newArray[i].getExpiryTime();
-            i:=i+1;
-        }
-
-        // assert newArray[..] == bloodStorage[index][..] + [b];
         insertionSort(valuearray, newArray);
-        // assert (forall x :: 0<=x<|bloodStorage| ==> (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null));
         bloodStorage := bloodStorage[index:= newArray];
-
-
-        // assert multiset(bloodStorage[index][..])==(multiset(old(bloodStorage[index][..]+[b])));
-
-        assert (forall x :: 0<=x<|bloodStorage| && x!=index ==> (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null));
-        assert forall y :: 0<=y<newArray.Length ==>newArray[y]!=null;
-
-        assert |bloodStorage|==8;
-        assert (forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null);
-        assert (forall x :: 0<=x<|bloodStorage| ==> (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null));
     }
 
     // ISSUE: There are extra requires clauses in transportationManager's receive()
@@ -578,134 +500,64 @@ class Storage {
         //transManager.dispatchBlood();
     }
 
-    // ISSUE: Verification not completed, need ensures clause
+
+
 
     // Helper: Remove head of array and return it
-    // method pop(index: int) returns (b: Blood)
-    // requires 0 <= index <= 7
-    // requires storageInitialised(bloodStorage)
-    // requires eightBloodTypes(bloodStorage)
-    // requires bloodStorage[index].Length>2
+    method pop(index: int) returns (b: Blood)
+    requires 0 <= index <= 7
+    requires Valid()
+    modifies this
+    modifies bloodStorage
+    ensures Valid()
+    // Ensures other blood storage arrays haven't been altered
+    ensures forall x :: 0<=x<|bloodStorage| && x!=index ==> bloodStorage[x]==old(bloodStorage[x])
+    ensures forall x :: 0<=x<|bloodStorage| && x!=index ==> multiset(bloodStorage[x][..])==multiset(old(bloodStorage[x][..]))
 
-    // modifies this
-    // modifies bloodStorage
+    // If target array has length>0 ensures changes, else, ensure no change
+    // Ensure the altered array has the first element missing, but otherwise identical. Same elements and order
+    ensures if old(bloodStorage[index].Length)>0 then old(bloodStorage[index].Length)==bloodStorage[index].Length+1 else old(bloodStorage[index].Length)==bloodStorage[index].Length
+    ensures if old(bloodStorage[index].Length)>0 then forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x]==old(bloodStorage[index][x+1]) else forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x]==old(bloodStorage[index][x])
+    ensures if old(bloodStorage[index].Length)>0 then multiset(bloodStorage[index][..])==multiset(old(bloodStorage[index][1..])) else multiset(bloodStorage[index][..])==multiset(old(bloodStorage[index][..]))
+    ensures if old(bloodStorage[index].Length)>0 then b==old(bloodStorage[index][0]) else b==null
+    {
 
-    // ensures eightBloodTypes(bloodStorage)
-    // ensures storageInitialised(bloodStorage)
-    // ensures if old(bloodStorage[index].Length==0) then b==null else b==old(bloodStorage[index][0])
-
-    // ensures forall x :: 0<=x<|bloodStorage| && x!=index ==> bloodStorage[x]==old(bloodStorage[x])
-    // ensures if old(bloodStorage[index].Length==0) then bloodStorage[index]==old(bloodStorage[index]) else bloodStorage[index].Length==old(bloodStorage[index].Length)-1
-    // ensures if old(bloodStorage[index].Length==0) then bloodStorage[index]==old(bloodStorage[index]) else forall x :: 0<= x < bloodStorage[index].Length ==>bloodStorage[index][x]==old(bloodStorage[index][x+1])
-    // {
-    //     // var a1: array<Blood> :=bloodStorage[0];
-    //     // var b1: array<Blood> :=bloodStorage[1];
-    //     // var c1: array<Blood> :=bloodStorage[2];
-    //     // var d1: array<Blood> :=bloodStorage[3];
-    //     // var e1: array<Blood> :=bloodStorage[4];
-    //     // var f1: array<Blood> :=bloodStorage[5];
-    //     // var g1: array<Blood> :=bloodStorage[6];
-    //     // var h1: array<Blood> :=bloodStorage[7];
-
-    //     var a := bloodStorage[index];
-
-    //     if (a.Length == 0) {
-    //         b := null;
-    //         return;
-    //     }
-    //     else 
-    //     {
-    //         b := a[0];
-    //         var newArray := new Blood[a.Length-1];
-    //         var i := 0;
-    //         while i + 1 < a.Length
-    //         decreases a.Length - (i + 1)
-    //         invariant i < a.Length
-    //         invariant forall k :: 0<=k<i ==> newArray[k]==a[k+1]
-    //         invariant forall j :: 0<=j<a.Length ==> a[j]==old(bloodStorage[index][j])
-    //         invariant |bloodStorage|==old(|bloodStorage|)
-    //         invariant forall x :: 0<=x<old(|bloodStorage|) ==> bloodStorage[x]==old(bloodStorage[x])
-    //         {
-    //             newArray[i] := a[i + 1];
-    //             i := i + 1;
-    //         }
-    //         change_blood_storage(index,newArray);
-    //         // assert()
-    //         // if index==0 {
-    //         //     a1:=newArray;
-    //         // }
-    //         // if index==1 {
-    //         //     b1:=newArray;
-    //         // }
-    //         // if index==2 {
-    //         //     c1:=newArray;
-    //         // }
-    //         // if index==3 {
-    //         //     d1:=newArray;
-    //         // }
-    //         // if index==4 {
-    //         //     e1:=newArray;
-    //         // }
-    //         // if index==5 {
-    //         //     f1:=newArray;
-    //         // }
-    //         // if index==6 {
-    //         //     g1:=newArray;
-    //         // }
-    //         // if index==7 {
-    //         //     h1:=newArray;
-    //         // }
-    //         // bloodStorage := [a1,b1,c1,d1,e1,f1,g1,h1];
-    //     }
-    // }
-
-
-
-    // method change_blood_storage(index:int,newArray:array<Blood>)
-    // requires 0<=index<=7
-    // requires |bloodStorage|==8
-    // modifies this.bloodStorage
-    // ensures |bloodStorage|==old(|bloodStorage|)
-    // ensures forall i :: 0<=i<|bloodStorage| && i!=index ==> bloodStorage[i]==old(bloodStorage[i])
-    // ensures bloodStorage[index]==newArray
-    // {
-    //     var a1: array<Blood> :=bloodStorage[0];
-    //     var b1: array<Blood> :=bloodStorage[1];
-    //     var c1: array<Blood> :=bloodStorage[2];
-    //     var d1: array<Blood> :=bloodStorage[3];
-    //     var e1: array<Blood> :=bloodStorage[4];
-    //     var f1: array<Blood> :=bloodStorage[5];
-    //     var g1: array<Blood> :=bloodStorage[6];
-    //     var h1: array<Blood> :=bloodStorage[7];
-
-    //     if index==0 {
-    //         a1:=newArray;
-    //     }
-    //     if index==1 {
-    //         b1:=newArray;
-    //     }
-    //     if index==2 {
-    //         c1:=newArray;
-    //     }
-    //     if index==3 {
-    //         d1:=newArray;
-    //     }
-    //     if index==4 {
-    //         e1:=newArray;
-    //     }
-    //     if index==5 {
-    //         f1:=newArray;
-    //     }
-    //     if index==6 {
-    //         g1:=newArray;
-    //     }
-    //     if index==7 {
-    //         h1:=newArray;
-    //     }
         
-    // }
+        var a := bloodStorage[index];
 
+        if (a.Length == 0) {
+            b := null;
+            return;
+        }
+        else 
+        {
 
+            
+            b := a[0];
+            var newArray := new Blood[a.Length-1];
+            var i := 0;
+
+            while i + 1 < a.Length
+            decreases a.Length - (i + 1)
+            invariant i < a.Length
+
+            invariant forall k :: 0<=k<i ==> newArray[k]==a[k+1]
+            invariant forall j :: 0<=j<a.Length ==> a[j]==old(bloodStorage[index][j])
+            invariant bloodStorage==old(bloodStorage)
+            invariant forall x :: 0<=x<|bloodStorage| ==> (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null)
+            invariant forall x :: 0<=x<|bloodStorage| ==> multiset(bloodStorage[x][..])==multiset(old(bloodStorage[x][..]))
+            invariant multiset(newArray[..i])==multiset(old(bloodStorage[index][1..i+1]))
+            invariant newArray!=null
+            {
+                newArray[i] := a[i + 1];
+                i := i + 1;
+            }
+
+            assert newArray[..a.Length-1]==newArray[..];
+            assert old(bloodStorage[index][1..a.Length])==old(bloodStorage[index][1..]);
+            bloodStorage := bloodStorage[index:=newArray];
+        }
+    }
 
     // Ensures that a certain blood type and rhesus corresponds to the correct index
     predicate correctIndex(t: Blood_types, rh: bool, index: int)
@@ -735,34 +587,6 @@ class Storage {
         // if (t == O && !rh) then 7
     }
 
-    // function method findIndex(t: Blood_types, rh: bool) returns (index: int)
-    // ensures correctIndex(t, rh, index)
-    // {
-    //     if (t == A && rh) {
-    //         index := 0;
-    //     }
-    //     else if (t == A && !rh) {
-    //         index := 1;
-    //     }
-    //     else if (t == B && rh) {
-    //         index := 2;
-    //     }
-    //     else if (t == B && !rh) {
-    //         index := 3;
-    //     }
-    //     else if (t == AB && rh) {
-    //         index := 4;
-    //     }
-    //     else if (t == AB && !rh) {
-    //         index := 5;
-    //     }
-    //     else if (t == O && rh) {
-    //         index := 6;
-    //     }
-    //     else if (t == O && !rh) {
-    //         index := 7;
-    //     }
-    // }
 
 }
 
