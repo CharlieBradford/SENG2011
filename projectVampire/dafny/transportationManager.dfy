@@ -145,12 +145,12 @@ class Blood{
 
 class transportationManager {
 	
-	var locale: int; // give each location an int value?
-	var available: int;
-	var destinations: array<int>; //:= new int[10]; // routes to destinations
-	var toSend: array<Blood>;// := new Blood[10]; // may need to have another array that matches the blood destinations to each index or create a class that can hold blood and its dest
-    	var toDest: array<int>;// := new int[10]; // routes (match with toSend array)
-	var size : int;
+	var locale: int; // each location represented as an int
+	var available: int; // place in buffer to add new blood
+	var size : int; // size of blood/dests to store in manager (realistically will be a fairly large number)
+	var toSend: array<Blood>;// := new Blood[10]; // blood to send 
+    var toDest: array<int>;// := new int[10]; // des of blood to send (index matches with toSend)
+
     	
 
 	// Blood always has a destination, ie every blood in array is matched by a route
@@ -184,8 +184,8 @@ class transportationManager {
 	ensures Valid()
 	{
 		locale := src;
-		size := 10;
-		toDest := new int[size]; // An example amount, could be a different size if required as long as size matches toSend
+		size := 10; // An example amount
+		toDest := new int[size]; 
 		forall x | 0 <= x < toDest.Length {toDest[x] := -1;}
 		toSend := new Blood[size];
 		forall x | 0 <= x < toSend.Length {toSend[x] := null;}
@@ -193,10 +193,10 @@ class transportationManager {
 		assert toDest != null;
 		assert toSend != null;
 		var i := 0;
-                var j := 0;
+        var j := 0;
 	}
 
-		
+	// Blood is recieved, store in available location
 	method receive(bld:Blood, dst:int)
 	modifies this.toDest
 	modifies this.toSend 
@@ -214,12 +214,13 @@ class transportationManager {
 	ensures forall x :: 0 <= x < size && x != available ==> toSend[x] == old(toSend)[x]
 	{
 		
-		available := if available == size -1 then 0 else available + 1;
+		available := if available == size -1 then 0 else available + 1; // If buffer is full, overwrite last stored value. Only send latest n blood objects
 		toSend[available] := bld;
 		toDest[available] := dst;
 		
 	}
 
+	// Blood is dispatched, toSend and toDest are emptied and available is adjusted
 	method dispatchBlood()
 	modifies this.toSend;
 	modifies this.toDest;
