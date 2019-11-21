@@ -154,7 +154,6 @@ class system:
 		recNode = None
 		for val in self.recipients:
 			if val.locale.locale.name == recipient:
-				print("Found", val.name)
 				recNode = val
 		if recNode == None:
 			print("No recipient registered as ", recipient)
