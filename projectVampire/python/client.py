@@ -51,6 +51,58 @@ while True:
         system.RequestBlood(splitlist[1],splitlist[2],rh)
 
     elif len(splitlist) == 1 and splitlist[0] == 'help':
+        print('''usage: <command> [<secondary_command>] <args>
+
+commands:
+    clinic [collect|send] <args>
+        
+        clinic collect <donor_id> 
+            - Collect a donation from the donor with the id <donor_id>
+            - If donor has not donated within past seven day
+              generates donation and returns true
+            - If donor is not eligible to donate it prints an error 
+              message
+            - Blood enters a queue, but remains at the clinic until 
+              sent
+              
+        clinic send
+            - Sends all of the blood currently queued at the clinic to
+              the nearest pathology
+            - The blood is verified at pathology and then sent onwards
+              to storage.
+            - The path of the blood is tracked and displayed and the 
+              user is informed of any losses.
+    
+    hospital [collect|send] <args>
+    
+        hospital collect <donor_id>
+            - Hospital collects a donation from a donor with 
+              <donor_id>
+            - The blood collected is automatically then verified
+            - Verification information is displayed when running this 
+              command
+    
+        hospital send
+            - Sends all of the blood currently queued at the hospital to 
+              storage
+            - The path of the blood is tracked and displayed and the user 
+              is informed
+            
+    request <args>
+        
+        request <destination> <blood_type> <rhesus>
+            - A recipient may make a request for blood by using this 
+              command
+            - The destination is the location to which the requested 
+              blood is to be sent to
+            - The specified blood type is the type of blood that is to 
+              be sent
+            - The specified rhesus is the rhesus of the blood that is to 
+              be sent
+            - The path of the blood is tracked and displayed, if blood 
+              is lost along the way it the request will automatically 
+              be re-sent''')
+        '''
         print("")
         print("Commands:")
         print("")
@@ -63,8 +115,8 @@ while True:
         print("request [recipient] [blood_type] [blood_rhesus] - Make a request for a certain type of blood and have it delivered if available")
 
         print("")
-
-    elif: len(splitlist) > 0 and splitlist[0].lower() in ['q', 'quit', 'exit']:
+        '''
+    elif len(splitlist) > 0 and splitlist[0].lower() in ['q', 'quit', 'exit']:
         break
     else:
         print("Command not recognised")
