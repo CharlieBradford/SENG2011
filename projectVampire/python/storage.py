@@ -14,17 +14,47 @@ class storage :
     # OP_blood = 6
     # ON_blood = 7
 
+    name = None
+    Xcoordinate=None
+    Ycoordinate=None
+    bloodStorage=None
+    transportManager=None
+
+
+
     # Constructor
-    def __init__(self, name, x, y):
-        self._name = name
+    def __init__(self, name_in, x, y):
+        self.name = name_in
         self.Xcoordinate = x
         self.Ycoordinate = y
-        self._bloodStorage = []
-        i = 0
-        while i < 8:
-            self._bloodStorage.append([])
-            i = i + 1
+
+        a = []
+        b = []
+        c = []
+        d = []
+        e = []
+        f = []
+        g = []
+        h = []
+
+
+        self.bloodStorage = (a,b,c,d,e,f,g,h)
+        # i = 0
+        # while i < 8:
+        #     self.bloodStorage.append([])
+        #     i = i + 1
         self.transportManager = None
+
+
+    # Requires different formatting as python has no forall logic expression
+    def Valid(self):
+        result=True
+        for x in range(0,len(self.bloodStorage)):
+            result2=True
+            for y in range(0,len(self.bloodStorage[x])):
+                result2=result2 and self.bloodStorage[x][y]!=None
+            result = result and self.bloodStorage[x]!=None and result2
+        return (len(self.bloodStorage)==8) and result
 
     # Adds a transportation manager
     def setTransportManager(self, manager):
@@ -36,24 +66,24 @@ class storage :
             print("Blood at storage expired. Discarding")
             return
         index = self.findIndex(blood.blood_type, blood.rhesus)
-        prevSize = len(self._bloodStorage[index])
+        prevSize = len(self.bloodStorage[index])
         newArray = [None] * (prevSize+1)
         i = 0
         while i < prevSize:
-            newArray[i] = self._bloodStorage[index][i]
+            newArray[i] = self.bloodStorage[index][i]
             i = i + 1
         newArray[prevSize] = blood
-        self._bloodStorage[index] = newArray
+        self.bloodStorage[index] = newArray
 
 
         # Generate list of blood times
         valuearray = [None] * (prevSize+1)
         i = 0
-        while i < len(self._bloodStorage[index]):
-            valuearray[i] = self._bloodStorage[index][i].getExpiryTime()
+        while i < len(self.bloodStorage[index]):
+            valuearray[i] = self.bloodStorage[index][i].getExpiryTime()
             i = i + 1
 
-        insertionSort(valuearray,self._bloodStorage[index])
+        insertionSort(valuearray,self.bloodStorage[index])
 
         print("Blood has been stored")
     
@@ -66,11 +96,11 @@ class storage :
     def discardBlood(self, currTime):
         # Do some ongoing loop to check for 00:00
         i = 0
-        while i < len(self._bloodStorage):
+        while i < len(self.bloodStorage):
             numToDiscard = 0
             j = 0
-            while j < len(self._bloodStorage[i]):
-                if currTime - self._bloodStorage[i][j].expiry_time < 60*60*24*2:
+            while j < len(self.bloodStorage[i]):
+                if currTime - self.bloodStorage[i][j].expiry_time < 60*60*24*2:
                     numToDiscard = numToDiscard + 1
                 j = j + 1
             self.removeN(i, numToDiscard)
@@ -98,7 +128,7 @@ class storage :
 
     # Helper: Remove head of array and return it
     def pop(self, index):
-        a = self._bloodStorage[index]
+        a = self.bloodStorage[index]
         if len(a) < 1:
             return None
         b = a[0]
@@ -107,17 +137,17 @@ class storage :
         while i + 1 < len(a):
             newArray[i] = a[i + 1]
             i = i + 1
-        self._bloodStorage[index] = newArray
+        self.bloodStorage[index] = newArray
         return b
 
     # Helper: Remove n elements from head of array
     def removeN(self, index, numToDiscard):
-        a = self._bloodStorage[index]
+        a = self.bloodStorage[index]
         newArray = []
         i = 0
         while i + numToDiscard < len(a):
             newArray[i] = a[i + numToDiscard]
-        self._bloodStorage[index] = newArray
+        self.bloodStorage[index] = newArray
 
     # Helper: Returns the index that is storing the required blood type
     def findIndex(self, type, rh):
