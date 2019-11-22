@@ -32,7 +32,7 @@ class donor
 
 method Test()
 {
-    var doner := new Donor();
+    var doner := new donor();
 
     var blud_1 := doner.collect_Blood(1000000);
     assert !doner.donation_allowed(1000060);

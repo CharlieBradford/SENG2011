@@ -82,7 +82,7 @@ modifies toMatch;
 }
 
 
-method Test()
+method TestInsertionSort()
 {
     var nums := new int[3];
   
