@@ -64,6 +64,8 @@ while True:
 
         print("")
 
+    elif: len(splitlist) > 0 and splitlist[0].lower() in ['q', 'quit', 'exit']:
+        break
     else:
         print("Command not recognised")
         print("Enter \"help\" for assistance on the available commands")

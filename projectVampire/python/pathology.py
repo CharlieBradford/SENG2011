@@ -39,10 +39,7 @@ class pathology:
             rhesus = bool(random.randint(0,1))
             accepted = True if random.randint(0,100) > DISCARD_CHANCE else False # make this fail on occasion
             if (accepted):
-                if rhesus:
-                    sign = "+"
-                else:
-                    sign = "-"
+                sign = "+" if rhesus else "-"
                 print("Blood has been verified and ACCEPTED, Type: ",blood_type,sign)
             else:
                 print("Blood has been verified and REJECTED")
