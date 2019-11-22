@@ -193,15 +193,15 @@ class donor
     {return ((last_donation+86400*7)-curr_time);}
 }
 
-method Test()
-{
-    var doner := new donor();
+// method Test()
+// {
+//     var doner := new donor();
 
-    var blud_1 := doner.collect_Blood(1000000);
-    assert !doner.donation_allowed(1000060);
-    assert doner.donation_allowed(2000000);
-    // doner.collectBlood(2,2,2);
-}
+//     var blud_1 := doner.collect_Blood(1000000);
+//     assert !doner.donation_allowed(1000060);
+//     assert doner.donation_allowed(2000000);
+//     // doner.collectBlood(2,2,2);
+// }
 
 // Insertion sort verification as per lecture notes
 // adapted to sort the blood objects for our system
@@ -290,28 +290,28 @@ modifies toMatch;
 }
 
 
-method Test()
-{
-    var nums := new int[3];
+// method Test()
+// {
+//     var nums := new int[3];
   
-    var blood := new Blood[3];
-    var temp := new Blood(10);
-    blood[0] := temp; 
-    temp := new Blood(5);
-    blood[1] := temp;
-    temp := new Blood(1);
-    blood[2] := temp;
+//     var blood := new Blood[3];
+//     var temp := new Blood(10);
+//     blood[0] := temp; 
+//     temp := new Blood(5);
+//     blood[1] := temp;
+//     temp := new Blood(1);
+//     blood[2] := temp;
    
-    nums[0] := blood[0].expiry_time;
-    nums[1] := blood[1].expiry_time;
-    nums[2] := blood[2].expiry_time; 
+//     nums[0] := blood[0].expiry_time;
+//     nums[1] := blood[1].expiry_time;
+//     nums[2] := blood[2].expiry_time; 
 
-    assert nums.Length == blood.Length;
-    assert forall x,y ::0 <= x < nums.Length &&  0 <= y < blood.Length && x == y ==> nums[x] == blood[y].expiry_time; 
-    insertionSort(nums, blood);
-    assert Sorted(nums,0,nums.Length-1); // array is sorted and blood has maintained 1-1 correspondence with the now sorted array
-    assert forall x, y :: 0 <= x < nums.Length && 0 <= y < blood.Length && x == y && blood[y] != null ==> nums[x] == blood[y].expiry_time;    
-}
+//     assert nums.Length == blood.Length;
+//     assert forall x,y ::0 <= x < nums.Length &&  0 <= y < blood.Length && x == y ==> nums[x] == blood[y].expiry_time; 
+//     insertionSort(nums, blood);
+//     assert Sorted(nums,0,nums.Length-1); // array is sorted and blood has maintained 1-1 correspondence with the now sorted array
+//     assert forall x, y :: 0 <= x < nums.Length && 0 <= y < blood.Length && x == y && blood[y] != null ==> nums[x] == blood[y].expiry_time;    
+// }
 
 // Storage class
 

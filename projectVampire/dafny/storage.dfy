@@ -189,7 +189,6 @@ class Storage {
     ensures if old(bloodStorage[index].Length)>0 then multiset(bloodStorage[index][..])==multiset(old(bloodStorage[index][1..])) else multiset(bloodStorage[index][..])==multiset(old(bloodStorage[index][..]))
     ensures if old(bloodStorage[index].Length)>0 then b==old(bloodStorage[index][0]) else b==null
     ensures forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
-    ensures fresh (bloodStorage)
     {
 
         
