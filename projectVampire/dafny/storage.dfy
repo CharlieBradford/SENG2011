@@ -386,24 +386,16 @@ class Storage {
     var Xcoordinate: int;
     var Ycoordinate: int;
     var bloodStorage: seq<array<Blood>>;
-    ghost var shadowblood : seq<seq<Blood>>
-    var transManager: transportationManager;
-
-
-    predicate Valid()
-    reads this
-    reads this.bloodStorage
-    // reads this.shadowblood
-    {|bloodStorage|==8 && forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null)}
+    var transportManager: transportationManager;
 
     // Constructor
-    constructor (n: string, x: int, y: int)
+    constructor (name_in: string, x: int, y: int)
     modifies this
-    ensures name == n && Xcoordinate == x && Ycoordinate == y && transManager == null
+    ensures name == name_in && Xcoordinate == x && Ycoordinate == y && transportManager == null
 
     ensures Valid()
     {
-        name := n;
+        name := name_in;
         Xcoordinate := x;
         Ycoordinate := y;
 
@@ -417,22 +409,31 @@ class Storage {
         var h : array<Blood> := new Blood[0];
 
         bloodStorage := [a,b,c,d,e,f,g,h];
-        transManager := null;
+        transportManager := null;
     }
+
+
+    predicate Valid()
+    reads this
+    reads this.bloodStorage
+    // reads this.shadowblood
+    {|bloodStorage|==8 && forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null)}
+
+
 
 
 
     // Adds a transportation manager
     method setTransportationManager(manager: transportationManager)
     modifies this
-    ensures transManager == manager
+    ensures transportManager == manager
     {
-        transManager := manager;
+        transportManager := manager;
     }
 
     
     // Stores blood and sorts according to expiry
-    method storeBlood(b: Blood)
+    method storeBlood(curr_time:int,b: Blood)
     requires b != null
     requires Valid()
     modifies this
@@ -442,8 +443,9 @@ class Storage {
     ensures forall x :: 0<=x<|bloodStorage| && x!=findIndex(b.blood_type, b.rhesus) ==> multiset(bloodStorage[x][..])==multiset(old(bloodStorage[x][..]))
     // Ensures specified blood array has only had element added
     ensures multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..]+[b])))
-    {
 
+    {
+        // if (b)
         var index := findIndex(b.blood_type, b.rhesus);
         // assert 0<=index<|bloodStorage|;
         // Update real array
@@ -485,7 +487,7 @@ class Storage {
     // Gives blood to transport so that they can prepare to dispatch it to the destination
     method notifyTransport(b: Blood, dest: int)
     requires b != null
-    requires transManager != null
+    requires transportManager != null
     {
         //transManager.receive(b, dest);
         //transManager.dispatchBlood();
