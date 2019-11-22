@@ -11,9 +11,10 @@
 // delivered = 4
 
 datatype Blood_types = O | A | B | AB
+datatype blood_state = unsafe | unverified | verified | storage | dispatched | delivered
 
 class Blood{
-    var state: int;
+    var state: blood_state;
     var collection_time: int; //Seconds since Unix Epoch
     var expiry_time:int
     var blood_type: Blood_types;
@@ -21,7 +22,7 @@ class Blood{
 
     predicate method Valid()
     reads this
-    {-1<=state<=4}
+    {state== unsafe || state==unverified || state==verified || state==storage || state==dispatched || state==delivered}
 
     predicate method expired(curr_time:int)
     reads this
@@ -29,75 +30,132 @@ class Blood{
 
     predicate method safe(curr_time:int)
     reads this
-    {0<=state<=4 && !expired(curr_time)}
+    {(state==unverified || state==verified || state==storage || state==dispatched || state==delivered) && !expired(curr_time)}
+
+    function method getExpiryTime(): int
+    reads this;
+    {
+        expiry_time
+    }
+
+    method reject_blood()
+    modifies this;
+    ensures state == unsafe
+    ensures Valid()
+    {
+        state := unsafe;
+    }
+
+    method get_blood_type() returns (b_type:Blood_types,rh:bool)
+    ensures b_type==blood_type
+    ensures rh==rhesus
+    {
+        b_type := blood_type;
+        rh := rhesus;
+    }
+
+    function method get_state(): blood_state
+	reads this
+    {
+        state
+    }
 
     constructor (secondsin:int)
     modifies this
     requires secondsin>=0
     ensures collection_time>=0 && collection_time==secondsin
-    ensures state == 0;
+    ensures state == unverified;
     {
         collection_time := secondsin;
-        expiry_time:=collection_time;
-        state := 0;
+        expiry_time:=secondsin + 604800;
+        state := unverified;
     }
 
-    method verify(curr_time:int,determined_type:Blood_types,rhesus_in:bool)
+    method verify_blood(curr_time:int,accepted:bool,determined_type:Blood_types,rhesus_in:bool) returns (success:bool)
     modifies this;
-    requires state==0;
-    ensures if safe(curr_time) then state ==1 else state==-1
+    requires state==unverified
+    requires Valid()
+    ensures if (safe(curr_time) && accepted) then state == verified else state==unsafe
     ensures blood_type==determined_type
     ensures rhesus == rhesus_in
+    ensures Valid()
+	ensures if success then state==verified else state==unsafe
     {
-        if safe(curr_time) {
-            state:=1;
+        if safe(curr_time) && accepted {
+            state:=verified;
+			success:=true;
         } else {
-            state:=-1;
+            state:=unsafe;
+			success:=false;
         }
-    blood_type:=determined_type;
-    rhesus:=rhesus_in;
+
+        blood_type:=determined_type;
+        rhesus:=rhesus_in;
     }
 
-    method store(curr_time:int)
+    method store_blood(curr_time:int) returns (success:bool)
     modifies this
-    requires state==1;
-    ensures if safe(curr_time) then state ==2 else state==-1;
+    requires Valid()
+    requires state==verified;
+    ensures if safe(curr_time) then state == storage else state==unsafe;
+    ensures Valid()
+	ensures if success then state==storage else state==unsafe
+	ensures safe(curr_time) == success
+	ensures blood_type==old(blood_type)
+	ensures rhesus == old(rhesus)
     {
         if safe(curr_time) {
-            state:=2;
+            state:=storage;
+			success:=true;
         } else {
-            state:=-1;
+            state:=unsafe;
+			success:=false;
         }  
     }
 
-    method dispatch(curr_time:int)
+    method dispatch_blood(curr_time:int) returns (success:bool)
     modifies this
-    requires state==2;
-    ensures if safe(curr_time) then state ==3 else state==-1;
+    requires Valid()
+    requires state==storage;
+    ensures if safe(curr_time) then state == dispatched else state==unsafe;
+    ensures Valid()
+	ensures if success then state==dispatched else state==unsafe
+	ensures blood_type==old(blood_type)
+	ensures rhesus == old(rhesus)
     {
         if safe(curr_time) {
-            state:=3;
+            state:=dispatched;
+			success:=true;
         } else {
-            state:=-1;
-        }         
+            state:=unsafe;
+			success:=false;
+        }
     }
 
-    method delivered(curr_time:int)
+    method deliver_blood(curr_time:int) returns (success:bool)
     modifies this
-    requires state==3;
-    ensures if safe(curr_time) then state ==4 else state==-1;
+    requires Valid()
+    requires state==dispatched;
+    ensures if safe(curr_time) then state ==delivered else state==unsafe;
+    ensures Valid()
+	ensures if success then state==delivered else state==unsafe
+	ensures blood_type==old(blood_type)
+	ensures rhesus == old(rhesus)
     {
         if safe(curr_time) {
-            state:=4;
+            state:=delivered;
+			success:=true;
         } else {
-            state:=-1;
+            state:=unsafe;
+			success:=false;
         }           
     }
 
     method reject()
     modifies this
-    ensures state ==-1;
-    {state:=-1;}
+    ensures state ==unsafe;
+    ensures Valid()
+    {state:=unsafe;}
 }
 
 
@@ -131,12 +189,17 @@ requires toMatch != null;
 requires forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
 requires toSort.Length == toMatch.Length;
 requires forall x,y ::0 <= x < toSort.Length && 0 <= y < toMatch.Length && x == y  && toMatch[y] != null ==> toMatch[y].expiry_time == toSort[x];
+requires forall x ::0 <= x < toSort.Length ==> toMatch[x].expiry_time == toSort[x];
 
 ensures Sorted(toSort,0,toSort.Length-1);
+ensures forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
+ensures forall x,z :: 0<=x<z<toSort.Length ==> toSort[x]<=toSort[z]
+ensures forall x ::0 <= x < toSort.Length ==> toMatch[x].expiry_time == toSort[x];
+ensures forall x,z :: 0<=x<z<toMatch.Length ==> toMatch[x].getExpiryTime()<=toMatch[z].getExpiryTime()
 ensures multiset(toSort[..]) == multiset(old(toSort[..]));
 ensures multiset(toMatch[..])==multiset(old(toMatch[..]))
 ensures forall x, y :: 0 <= x < toSort.Length && 0 <= y < toMatch.Length && x == y && toMatch[y] != null ==> toMatch[y].expiry_time == toSort[x];
-ensures forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
+
 modifies toSort;
 modifies toMatch;
 {

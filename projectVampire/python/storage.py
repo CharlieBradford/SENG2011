@@ -61,40 +61,39 @@ class storage :
         self.transportManager = manager
 
     # Stores blood and sorts according to expiry
-    def storeBlood(self,curr_time, blood):
+    def storeBlood(self,curr_time, b):
         if(not blood.store_blood(curr_time)):
             print("Blood at storage expired. Discarding")
             return
         index = self.findIndex(blood.blood_type, blood.rhesus)
         prevSize = len(self.bloodStorage[index])
         newArray = [None] * (prevSize+1)
-        i = 0
-        while i < prevSize:
-            newArray[i] = self.bloodStorage[index][i]
-            i = i + 1
-        newArray[prevSize] = blood
-        self.bloodStorage[index] = newArray
-
-
-        # Generate list of blood times
         valuearray = [None] * (prevSize+1)
         i = 0
-        while i < len(self.bloodStorage[index]):
-            valuearray[i] = self.bloodStorage[index][i].getExpiryTime()
+
+
+        while i < prevSize:
+            newArray[i] = self.bloodStorage[index][i]
+            valuearray[i] = self.newArray[index][i].getExpiryTime()
             i = i + 1
 
-        insertionSort(valuearray,self.bloodStorage[index])
-
+        newArray[len(newArray)-1] = b
+        valuearray[len(newArray)-1] = b.getExpiryTime()
+        
+        insertionSort(valuearray,newArray)
+        self.bloodStorage[index] = newArray
         print("Blood has been stored")
     
 
+    # Function to insert system time. Not verifiable in dafny
     def accept(self,blood):
         print("**Blood arrived at storage**")
         self.storeBlood(time_sec.get_now(),blood)
 
+
+
     # Discard expired blood
     def discardBlood(self, currTime):
-        # Do some ongoing loop to check for 00:00
         i = 0
         while i < len(self.bloodStorage):
             numToDiscard = 0
