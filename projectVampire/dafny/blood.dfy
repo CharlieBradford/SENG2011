@@ -54,10 +54,10 @@ class Blood{
         rh := rhesus;
     }
 
-    method get_state() returns (bl_state:blood_state)
-    ensures bl_state == state
+    function method get_state(): blood_state
+	reads this
     {
-        bl_state := state;
+        state
     }
 
     constructor (secondsin:int)
@@ -71,7 +71,7 @@ class Blood{
         state := unverified;
     }
 
-    method verify_blood(curr_time:int,accepted:bool,determined_type:Blood_types,rhesus_in:bool)
+    method verify_blood(curr_time:int,accepted:bool,determined_type:Blood_types,rhesus_in:bool) returns (success:bool)
     modifies this;
     requires state==unverified
     requires Valid()
@@ -79,56 +79,79 @@ class Blood{
     ensures blood_type==determined_type
     ensures rhesus == rhesus_in
     ensures Valid()
+	ensures if success then state==verified else state==unsafe
+    ensures expiry_time==old(expiry_time)
     {
         if safe(curr_time) && accepted {
             state:=verified;
+			success:=true;
         } else {
             state:=unsafe;
+			success:=false;
         }
 
         blood_type:=determined_type;
         rhesus:=rhesus_in;
     }
 
-    method store_blood(curr_time:int)
+    method store_blood(curr_time:int) returns (success:bool)
     modifies this
     requires Valid()
     requires state==verified;
     ensures if safe(curr_time) then state == storage else state==unsafe;
     ensures Valid()
+	ensures if success then state==storage else state==unsafe
+	ensures safe(curr_time) == success
+	ensures blood_type==old(blood_type)
+	ensures rhesus == old(rhesus)
+    ensures expiry_time==old(expiry_time)
     {
         if safe(curr_time) {
             state:=storage;
+			success:=true;
         } else {
             state:=unsafe;
+			success:=false;
         }  
     }
 
-    method dispatch_blood(curr_time:int)
+    method dispatch_blood(curr_time:int) returns (success:bool)
     modifies this
     requires Valid()
     requires state==storage;
     ensures if safe(curr_time) then state == dispatched else state==unsafe;
     ensures Valid()
+	ensures if success then state==dispatched else state==unsafe
+	ensures blood_type==old(blood_type)
+	ensures rhesus == old(rhesus)
+    ensures expiry_time==old(expiry_time)
     {
         if safe(curr_time) {
             state:=dispatched;
+			success:=true;
         } else {
             state:=unsafe;
-        }         
+			success:=false;
+        }
     }
 
-    method deliver_blood(curr_time:int)
+    method deliver_blood(curr_time:int) returns (success:bool)
     modifies this
     requires Valid()
     requires state==dispatched;
     ensures if safe(curr_time) then state ==delivered else state==unsafe;
     ensures Valid()
+	ensures if success then state==delivered else state==unsafe
+	ensures blood_type==old(blood_type)
+	ensures rhesus == old(rhesus)
+    ensures expiry_time==old(expiry_time)
     {
         if safe(curr_time) {
             state:=delivered;
+			success:=true;
         } else {
             state:=unsafe;
+			success:=false;
         }           
     }
 
@@ -138,5 +161,3 @@ class Blood{
     ensures Valid()
     {state:=unsafe;}
 }
-
-

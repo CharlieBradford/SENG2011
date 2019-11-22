@@ -1,5 +1,4 @@
 
-
 // Insertion sort verification as per lecture notes
 // adapted to sort the blood objects for our system
 
@@ -33,12 +32,17 @@ requires toMatch != null;
 requires forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
 requires toSort.Length == toMatch.Length;
 requires forall x,y ::0 <= x < toSort.Length && 0 <= y < toMatch.Length && x == y  && toMatch[y] != null ==> toMatch[y].expiry_time == toSort[x];
+requires forall x ::0 <= x < toSort.Length ==> toMatch[x].expiry_time == toSort[x];
 
 ensures Sorted(toSort,0,toSort.Length-1);
+ensures forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
+ensures forall x,z :: 0<=x<z<toSort.Length ==> toSort[x]<=toSort[z]
+ensures forall x ::0 <= x < toSort.Length ==> toMatch[x].expiry_time == toSort[x];
+ensures forall x,z :: 0<=x<z<toMatch.Length ==> toMatch[x].getExpiryTime()<=toMatch[z].getExpiryTime()
 ensures multiset(toSort[..]) == multiset(old(toSort[..]));
 ensures multiset(toMatch[..])==multiset(old(toMatch[..]))
 ensures forall x, y :: 0 <= x < toSort.Length && 0 <= y < toMatch.Length && x == y && toMatch[y] != null ==> toMatch[y].expiry_time == toSort[x];
-ensures forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
+
 modifies toSort;
 modifies toMatch;
 {
@@ -82,26 +86,26 @@ modifies toMatch;
 }
 
 
-method TestInsertionSort()
-{
-    var nums := new int[3];
+// method Test()
+// {
+//     var nums := new int[3];
   
-    var blood := new Blood[3];
-    var temp := new Blood(10);
-    blood[0] := temp; 
-    temp := new Blood(5);
-    blood[1] := temp;
-    temp := new Blood(1);
-    blood[2] := temp;
+//     var blood := new Blood[3];
+//     var temp := new Blood(10);
+//     blood[0] := temp; 
+//     temp := new Blood(5);
+//     blood[1] := temp;
+//     temp := new Blood(1);
+//     blood[2] := temp;
    
-    nums[0] := blood[0].expiry_time;
-    nums[1] := blood[1].expiry_time;
-    nums[2] := blood[2].expiry_time; 
+//     nums[0] := blood[0].expiry_time;
+//     nums[1] := blood[1].expiry_time;
+//     nums[2] := blood[2].expiry_time; 
 
-    assert nums.Length == blood.Length;
-    assert forall x,y ::0 <= x < nums.Length &&  0 <= y < blood.Length && x == y ==> nums[x] == blood[y].expiry_time; 
-    insertionSort(nums, blood);
-    assert Sorted(nums,0,nums.Length-1); // array is sorted and blood has maintained 1-1 correspondence with the now sorted array
-    assert forall x, y :: 0 <= x < nums.Length && 0 <= y < blood.Length && x == y && blood[y] != null ==> nums[x] == blood[y].expiry_time;    
-}
+//     assert nums.Length == blood.Length;
+//     assert forall x,y ::0 <= x < nums.Length &&  0 <= y < blood.Length && x == y ==> nums[x] == blood[y].expiry_time; 
+//     insertionSort(nums, blood);
+//     assert Sorted(nums,0,nums.Length-1); // array is sorted and blood has maintained 1-1 correspondence with the now sorted array
+//     assert forall x, y :: 0 <= x < nums.Length && 0 <= y < blood.Length && x == y && blood[y] != null ==> nums[x] == blood[y].expiry_time;    
+// }
 

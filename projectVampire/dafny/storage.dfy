@@ -1,3 +1,7 @@
+// Storage class
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 class Storage {
 
     // Index for bloodStorage
@@ -45,8 +49,7 @@ class Storage {
     predicate Valid()
     reads this
     reads this.bloodStorage
-    // reads this.shadowblood
-    {|bloodStorage|==8 && forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null)}
+    {|bloodStorage|==8 && (forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null))}
 
 
 
@@ -64,20 +67,33 @@ class Storage {
     // Stores blood and sorts according to expiry
     method storeBlood(curr_time:int,b: Blood)
     requires b != null
+    requires b.get_state()==verified
     requires Valid()
     modifies this
+    modifies b
     ensures Valid()
+    requires forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
     // Ensures other blood arrays haven't been altered
     ensures forall x :: 0<=x<|bloodStorage| && x!=findIndex(b.blood_type, b.rhesus) ==> bloodStorage[x]==old(bloodStorage[x])
     ensures forall x :: 0<=x<|bloodStorage| && x!=findIndex(b.blood_type, b.rhesus) ==> multiset(bloodStorage[x][..])==multiset(old(bloodStorage[x][..]))
-    // Ensures specified blood array has only had element added
-    ensures multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..]+[b])))
+    // Ensures if blood is valid for change then specified blood array has only had element added
+    // But if blood is unsafe, do not change anything
+    ensures if b.safe(curr_time) then multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..]+[b]))) else multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])))
+    // Ensure if blood is unsafe, then bloodstorage hasn't been changed
+    ensures !b.safe(curr_time) ==> bloodStorage==old(bloodStorage)
+    // Ensures that all blood arrays are correctly sorted
+    ensures forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
 
     {
-        // if (b)
+        var temp := b.store_blood(curr_time);
+        if(!temp) {
+            return;
+        }
+
+
+        assert forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime());
+
         var index := findIndex(b.blood_type, b.rhesus);
-        // assert 0<=index<|bloodStorage|;
-        // Update real array
 
         var prevSize := bloodStorage[index].Length;
         var newArray := new Blood[prevSize+1];
@@ -86,19 +102,25 @@ class Storage {
 
         assert forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x] !=null;
 
+
+
         while i < prevSize
         decreases prevSize - i
         invariant i - 1 < prevSize
         invariant bloodStorage==old(bloodStorage)
         invariant forall x ::  0<=x<i ==> newArray[x]!=null
         invariant forall x ::  0<=x<i ==> valuearray[x]==newArray[x].getExpiryTime()
-        invariant  newArray[..i] == bloodStorage[index][..i]
+        invariant newArray[..i] == bloodStorage[index][..i]
+        invariant findIndex(b.blood_type, b.rhesus)==index;
+        invariant b.safe(curr_time)
+        invariant forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
         {
             newArray[i] := bloodStorage[index][i];
             valuearray[i] := newArray[i].getExpiryTime();
             i := i + 1;
         }
 
+         
         newArray[newArray.Length-1]:=b;
         valuearray[newArray.Length-1]:=b.getExpiryTime();
 
@@ -109,28 +131,52 @@ class Storage {
         bloodStorage := bloodStorage[index:= newArray];
     }
 
-    // ISSUE: There are extra requires clauses in transportationManager's receive()
-    //        that storage cannot supply. Storage can only require the below successfully,
-    //        is it possible to change receive() so that it can be called from here?
-
-    // Gives blood to transport so that they can prepare to dispatch it to the destination
-    method notifyTransport(b: Blood, dest: int)
-    requires b != null
-    requires transportManager != null
-    {
-        //transManager.receive(b, dest);
-        //transManager.dispatchBlood();
-    }
 
 
 
+
+
+    // method discardBlood(curr_time:int)
+    // requires Valid()
+    // requires forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
+    // modifies this
+    // modifies this.bloodStorage
+    // modifies set j | 0<=j<|this.bloodStorage| :: this.bloodStorage[j]
+    // ensures Valid()
+    // {
+    //     var bloodsize := |bloodStorage|;
+    //     var i:=0;
+    //     var x;
+    //     while i < bloodsize
+    //     modifies this
+    //     modifies this.bloodStorage
+    //     modifies set j | 0<=j<|this.bloodStorage| :: this.bloodStorage[j]
+    //     decreases bloodsize-i
+    //     invariant |bloodStorage|==8 && (forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null))
+    //     invariant forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
+    //     {
+    //         while bloodStorage[i].Length>0 && bloodStorage[i][0].getExpiryTime() - curr_time < 60*60*25
+    //         modifies this
+    //         modifies this.bloodStorage
+    //         modifies set j | 0<=j<|this.bloodStorage| :: this.bloodStorage[j]
+    //         invariant |bloodStorage|==8 && (forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null))
+    //         invariant forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
+    //         {
+    //             // We want to discard blood, so ignore return value
+    //             x:=pop(i); 
+    //         }
+    //         i:=i+1;
+    //     }
+    // }
+ 
 
     // Helper: Remove head of array and return it
     method pop(index: int) returns (b: Blood)
     requires 0 <= index <= 7
     requires Valid()
+    requires forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
     modifies this
-    modifies bloodStorage
+    modifies this.bloodStorage
     ensures Valid()
     // Ensures other blood storage arrays haven't been altered
     ensures forall x :: 0<=x<|bloodStorage| && x!=index ==> bloodStorage[x]==old(bloodStorage[x])
@@ -142,6 +188,8 @@ class Storage {
     ensures if old(bloodStorage[index].Length)>0 then forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x]==old(bloodStorage[index][x+1]) else forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x]==old(bloodStorage[index][x])
     ensures if old(bloodStorage[index].Length)>0 then multiset(bloodStorage[index][..])==multiset(old(bloodStorage[index][1..])) else multiset(bloodStorage[index][..])==multiset(old(bloodStorage[index][..]))
     ensures if old(bloodStorage[index].Length)>0 then b==old(bloodStorage[index][0]) else b==null
+    ensures forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
+    ensures fresh (bloodStorage)
     {
 
         
@@ -169,6 +217,7 @@ class Storage {
             invariant forall x :: 0<=x<|bloodStorage| ==> (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null)
             invariant forall x :: 0<=x<|bloodStorage| ==> multiset(bloodStorage[x][..])==multiset(old(bloodStorage[x][..]))
             invariant multiset(newArray[..i])==multiset(old(bloodStorage[index][1..i+1]))
+            invariant forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
             invariant newArray!=null
             {
                 newArray[i] := a[i + 1];

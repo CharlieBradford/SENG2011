@@ -30,12 +30,12 @@ class donor
     {return ((last_donation+86400*7)-curr_time);}
 }
 
-method Test()
-{
-    var doner := new donor();
+// method Test()
+// {
+//     var doner := new donor();
 
-    var blud_1 := doner.collect_Blood(1000000);
-    assert !doner.donation_allowed(1000060);
-    assert doner.donation_allowed(2000000);
-    // doner.collectBlood(2,2,2);
-}
+//     var blud_1 := doner.collect_Blood(1000000);
+//     assert !doner.donation_allowed(1000060);
+//     assert doner.donation_allowed(2000000);
+//     // doner.collectBlood(2,2,2);
+// }
