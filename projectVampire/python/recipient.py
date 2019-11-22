@@ -17,7 +17,7 @@ class recipient:
 			print("Expired blood arrived at recipient. Discarding")
 
 	def setTransportManager(self, tman):
-		self.setTransportManager = tman
+		self.transportManager = tman
 
 	def setNode(self, node):
 		self.node = node

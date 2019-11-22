@@ -319,12 +319,11 @@ requires toSort != null;
 requires toMatch != null;
 requires forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
 requires toSort.Length == toMatch.Length;
-//requires forall x :: 0 <= x < toSort.Length ==> toSort[x] != null
 requires forall x,y ::0 <= x < toSort.Length && 0 <= y < toMatch.Length && x == y  && toMatch[y] != null ==> toMatch[y].expiry_time == toSort[x];
 
 ensures Sorted(toSort,0,toSort.Length-1);
 ensures multiset(toSort[..]) == multiset(old(toSort[..]));
-ensures multiset(toMatch[..]) == multiset(old(toMatch[..]))
+ensures multiset(toMatch[..])==multiset(old(toMatch[..]))
 ensures forall x, y :: 0 <= x < toSort.Length && 0 <= y < toMatch.Length && x == y && toMatch[y] != null ==> toMatch[y].expiry_time == toSort[x];
 ensures forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
 modifies toSort;
@@ -341,34 +340,26 @@ modifies toMatch;
     invariant Sorted(toSort, 0, start); // array is sorted up to start
     invariant multiset(toSort[..]) == multiset(old(toSort[..])); // keep array the same
     invariant multiset(toMatch[..]) == multiset(old(toMatch[..]));
-    invariant forall x, y :: 0 <= x < toMatch.Length && 0 <= toSort.Length && x == y && toMatch[x] != null ==> toSort[y] == toMatch[x].expiry_time;
-    invariant forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
-    //invariant Matching(toSort, toMatch);
-    //invariant forall x :: 0 <= x < toSort.Length ==> toSort[x] != null
-    //invariant forall x :: 0 <= x < toSort.Length 
+    invariant forall x, y :: 0 <= x < toMatch.Length && 0 <= toSort.Length && x == y && toMatch[x] != null ==> toSort[y] == toMatch[x].expiry_time; // 1-1 correspondence
     {
         var end := start;
         while (end >= 1 && toSort[end-1] > toSort[end])
         invariant 0 <= end <= start; // end is within limits
-        invariant multiset(toSort[..]) == multiset(old(toSort[..])); // array stays the same
-        invariant multiset(toMatch[..]) == multiset(old(toMatch[..]));
-        //invariant Matching(toSort, toMatch);
-        //invariant forall i :: 0 <= i < toSort.Length ==> toSort[i] != null;
+
+        invariant multiset(toSort[..]) == multiset(old(toSort[..])); // arrays stay the same
+	    invariant multiset(toMatch[..]) == multiset(old(toMatch[..]));
         invariant forall i, j :: (0 <= i <= j <= start && j != end) ==> toSort[i] <= toSort[j]; // all values less than start are sorted
-        //invariant forall i :: (0 <= i <= start && i != end && toMatch[i] != null) ==> toSort[i] == toMatch[i].expiry_time;
-        invariant forall x, y :: 0 <= x < toMatch.Length && 0 <= toSort.Length && x == y && toMatch[x] != null ==> toSort[y] == toMatch[x].expiry_time;
-        invariant forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
-        {
-            var temp := toSort[end-1];
-            toSort[end-1] := toSort[end];
-                toSort[end] := temp;
-        
-            var temp2 := toMatch[end-1];
-            toMatch[end-1] := toMatch[end];
-            toMatch[end] := temp2;
-        
-        end := end -1;
-        
+        invariant forall x, y :: 0 <= x < toMatch.Length && 0 <= toSort.Length && x == y && toMatch[x] != null ==> toSort[y] == toMatch[x].expiry_time; // 1-1 correspondence
+	    {
+           	var temp := toSort[end-1];
+           	toSort[end-1] := toSort[end];
+            toSort[end] := temp;
+		
+	    	var temp2 := toMatch[end-1];
+	    	toMatch[end-1] := toMatch[end];
+	    	toMatch[end] := temp2;
+		
+		    end := end -1;
         }
         start := start + 1;
     }

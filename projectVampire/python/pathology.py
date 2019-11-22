@@ -3,6 +3,7 @@ from blood import blood_state
 import random
 from time_sec import time_sec
 import time
+DISCARD_CHANCE = 12
 
 class pathology:
 
@@ -16,10 +17,10 @@ class pathology:
         self.storage = storage
 
     def accept(self,blood):
-        print("**Blood arrived at pathology** ", blood.state)
+        print("**Blood arrived at pathology** ")
         vblood = self.verify(blood)
         if (vblood != None):
-            print("Sending blood from pathology with state", vblood.state)
+            print("Sending blood from pathology with state")
             self.transport_manager.receive(vblood, None)
             self.transport_manager.dispatchBlood()
         else:
@@ -36,7 +37,7 @@ class pathology:
             blood_types = ['O','A','B','AB']
             blood_type = blood_types[randint]
             rhesus = bool(random.randint(0,1))
-            accepted = True # make this fail on occasion
+            accepted = True if random.randint(0,100) > DISCARD_CHANCE else False # make this fail on occasion
             if (accepted):
                 if rhesus:
                     sign = "+"
@@ -48,7 +49,7 @@ class pathology:
             if(blood.verify_blood(time_sec.get_now(),accepted,blood_type,rhesus)):
                 return blood
             else:
-                # Blood is expired
+                # Blood is expired or unsafe
                 return None
 
     def setNode(self, node):

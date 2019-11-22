@@ -68,13 +68,24 @@ class system:
 		self.hospitalNode.addConnection(self.node0)
 		self.node0.addConnection(self.hospitalNode)
 
-		self.recipientHospital = recipient("Recipient_name", 6,12)
+		self.recipientHospital = recipient("Recipient1", 6,12)
 		self.recipientHospital.setTransportManager(self.recipientHospital)
 		self.recipientTransportManager = transportationManager(self.recipientHospital,self)
 		self.recipientNode = transportNode(8, self.recipientHospital.Xcoordinate, self.recipientHospital.Ycoordinate,self.recipientTransportManager)
 		self.recipientTransportManager.setNode(self.recipientNode)
 		self.recipientNode.addConnection(self.node5)
 		self.node5.addConnection(self.recipientNode)
+
+		self.recipientHospital2 = recipient("Recipient2", 1,12)
+		self.recipientHospital2.setTransportManager(self.recipientHospital2)
+		self.recipientTransportManager2 = transportationManager(self.recipientHospital2,self)
+		self.recipientNode2 = transportNode(11, self.recipientHospital2.Xcoordinate, self.recipientHospital2.Ycoordinate,self.recipientTransportManager2)
+		self.recipientTransportManager2.setNode(self.recipientNode2)
+		self.recipientNode2.addConnection(self.node0)
+		self.node0.addConnection(self.recipientNode2)
+
+		# store recipients here
+		self.recipients = [self.recipientNode2, self.recipientNode]
 
 		self.store = storage("Storage",6,1)
 		self.storeTransportManager = transportationManager(self.store,self)
@@ -94,7 +105,7 @@ class system:
 		self.pathoNode.addConnection(self.node5)
 		self.node5.addConnection(self.pathoNode)
 
-		self.world = [self.node0,self.node1,self.node2,self.node3,self.node4,self.node5,self.clinicNode,self.hospitalNode,self.recipientNode,self.storeNode,self.pathoNode]
+		self.world = [self.node0,self.node1,self.node2,self.node3,self.node4,self.node5,self.clinicNode,self.hospitalNode,self.recipientNode,self.storeNode,self.pathoNode, self.recipientNode2]
 		self.routingSystem = transportationRoute(self.world, self)
 
 
@@ -140,15 +151,21 @@ class system:
 
 	def RequestBlood(self,recipient,blood_type,rhesus):
 		# need to dynamically choose the storage location to use # TODO
-		self.store.serviceRequest(time_sec.get_now(),blood_type, rhesus, self.recipientNode) # need to dynamically choose the recipient # TODO
-		#TODO/TO ASK: storage and recv
+		recNode = None
+		for val in self.recipients:
+			if val.locale.locale.name == recipient:
+				recNode = val
+		if recNode == None:
+			print("No recipient registered as ", recipient)
+		else:
+			self.store.serviceRequest(time_sec.get_now(),blood_type, rhesus, recNode) # need to dynamically choose the recipient # TODO
 
 
 	def getRequiredNode(self, blood):
 		tNode = None
 		if blood.state == blood_state.unverified:
 			# to be verified
-			tNode = self.pathoNode # need to dynamically choose 'best' node of destination type, do this in transportationRoute # TODO
+			tNode = self.pathoNode 
 		elif blood.state == blood_state.storage:
 			# to be sent to recipient
 			tNode = self.recipientNode

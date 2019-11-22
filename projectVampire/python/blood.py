@@ -96,6 +96,7 @@ class blood:
         return return_val
 
     def store_blood(self,curr_time):
+        #print(self.state)
         assert(self.valid())
         assert(self.state==blood_state.verified)
 
