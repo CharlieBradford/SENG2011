@@ -1,5 +1,3 @@
-
-
 // state:
 // unsafe = -1
 // unverified = 0
@@ -55,10 +53,10 @@ class Blood{
         rh := rhesus;
     }
 
-    function method get_state(): blood_state
-	reads this
+    method get_state() returns (bl_state:blood_state)
+    ensures bl_state == state
     {
-        state
+        bl_state := state;
     }
 
     constructor (secondsin:int)
@@ -72,7 +70,7 @@ class Blood{
         state := unverified;
     }
 
-    method verify_blood(curr_time:int,accepted:bool,determined_type:Blood_types,rhesus_in:bool) returns (success:bool)
+    method verify_blood(curr_time:int,accepted:bool,determined_type:Blood_types,rhesus_in:bool)
     modifies this;
     requires state==unverified
     requires Valid()
@@ -80,79 +78,56 @@ class Blood{
     ensures blood_type==determined_type
     ensures rhesus == rhesus_in
     ensures Valid()
-	ensures if success then state==verified else state==unsafe
-    ensures expiry_time==old(expiry_time)
     {
         if safe(curr_time) && accepted {
             state:=verified;
-			success:=true;
         } else {
             state:=unsafe;
-			success:=false;
         }
 
         blood_type:=determined_type;
         rhesus:=rhesus_in;
     }
 
-    method store_blood(curr_time:int) returns (success:bool)
+    method store_blood(curr_time:int)
     modifies this
     requires Valid()
     requires state==verified;
     ensures if safe(curr_time) then state == storage else state==unsafe;
     ensures Valid()
-	ensures if success then state==storage else state==unsafe
-	ensures safe(curr_time) == success
-	ensures blood_type==old(blood_type)
-	ensures rhesus == old(rhesus)
-    ensures expiry_time==old(expiry_time)
     {
         if safe(curr_time) {
             state:=storage;
-			success:=true;
         } else {
             state:=unsafe;
-			success:=false;
         }  
     }
 
-    method dispatch_blood(curr_time:int) returns (success:bool)
+    method dispatch_blood(curr_time:int)
     modifies this
     requires Valid()
     requires state==storage;
     ensures if safe(curr_time) then state == dispatched else state==unsafe;
     ensures Valid()
-	ensures if success then state==dispatched else state==unsafe
-	ensures blood_type==old(blood_type)
-	ensures rhesus == old(rhesus)
-    ensures expiry_time==old(expiry_time)
     {
         if safe(curr_time) {
             state:=dispatched;
-			success:=true;
         } else {
             state:=unsafe;
-			success:=false;
-        }
+        }         
     }
 
-    method deliver_blood(curr_time:int) returns (success:bool)
+    method deliver_blood(curr_time:int)
     modifies this
     requires Valid()
     requires state==dispatched;
     ensures if safe(curr_time) then state ==delivered else state==unsafe;
     ensures Valid()
-	ensures if success then state==delivered else state==unsafe
-	ensures blood_type==old(blood_type)
-	ensures rhesus == old(rhesus)
-    ensures expiry_time==old(expiry_time)
     {
         if safe(curr_time) {
             state:=delivered;
-			success:=true;
         } else {
             state:=unsafe;
-			success:=false;
         }           
     }
 
@@ -161,7 +136,10 @@ class Blood{
     ensures state ==unsafe;
     ensures Valid()
     {state:=unsafe;}
-}//include blood.dfy
+}
+
+
+//include blood.dfy
 
 class donor
 {
@@ -193,15 +171,16 @@ class donor
     {return ((last_donation+86400*7)-curr_time);}
 }
 
-// method Test()
-// {
-//     var doner := new donor();
+method Test()
+{
+    var doner := new donor();
 
-//     var blud_1 := doner.collect_Blood(1000000);
-//     assert !doner.donation_allowed(1000060);
-//     assert doner.donation_allowed(2000000);
-//     // doner.collectBlood(2,2,2);
-// }
+    var blud_1 := doner.collect_Blood(1000000);
+    assert !doner.donation_allowed(1000060);
+    assert doner.donation_allowed(2000000);
+    // doner.collectBlood(2,2,2);
+}
+
 
 // Insertion sort verification as per lecture notes
 // adapted to sort the blood objects for our system
@@ -227,7 +206,7 @@ reads arr1;
 reads arr2;
 reads arr2[..];
 {
-	forall i :: 0 <= i < arr1.Length && arr2[i] != null ==> arr2[i].expiry_time == arr1[i]
+    forall i :: 0 <= i < arr1.Length && arr2[i] != null ==> arr2[i].expiry_time == arr1[i]
 }
 
 method insertionSort(toSort: array<int>, toMatch: array<Blood>)
@@ -236,17 +215,12 @@ requires toMatch != null;
 requires forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
 requires toSort.Length == toMatch.Length;
 requires forall x,y ::0 <= x < toSort.Length && 0 <= y < toMatch.Length && x == y  && toMatch[y] != null ==> toMatch[y].expiry_time == toSort[x];
-requires forall x ::0 <= x < toSort.Length ==> toMatch[x].expiry_time == toSort[x];
 
 ensures Sorted(toSort,0,toSort.Length-1);
-ensures forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
-ensures forall x,z :: 0<=x<z<toSort.Length ==> toSort[x]<=toSort[z]
-ensures forall x ::0 <= x < toSort.Length ==> toMatch[x].expiry_time == toSort[x];
-ensures forall x,z :: 0<=x<z<toMatch.Length ==> toMatch[x].getExpiryTime()<=toMatch[z].getExpiryTime()
 ensures multiset(toSort[..]) == multiset(old(toSort[..]));
 ensures multiset(toMatch[..])==multiset(old(toMatch[..]))
 ensures forall x, y :: 0 <= x < toSort.Length && 0 <= y < toMatch.Length && x == y && toMatch[y] != null ==> toMatch[y].expiry_time == toSort[x];
-
+ensures forall x :: 0<=x<toMatch.Length ==> toMatch[x]!=null
 modifies toSort;
 modifies toMatch;
 {
@@ -269,20 +243,20 @@ modifies toMatch;
         invariant 0 <= end <= start; // end is within limits
 
         invariant multiset(toSort[..]) == multiset(old(toSort[..])); // arrays stay the same
-	    invariant multiset(toMatch[..]) == multiset(old(toMatch[..]));
+        invariant multiset(toMatch[..]) == multiset(old(toMatch[..]));
         invariant forall i, j :: (0 <= i <= j <= start && j != end) ==> toSort[i] <= toSort[j]; // all values less than start are sorted
         invariant forall x, y :: 0 <= x < toMatch.Length && 0 <= toSort.Length && x == y && toMatch[x] != null ==> toSort[y] == toMatch[x].expiry_time; // 1-1 correspondence
         invariant forall x :: 0<=x<toMatch.Length==>toMatch[x]!=null
-	    {
-           	var temp := toSort[end-1];
-           	toSort[end-1] := toSort[end];
+        {
+            var temp := toSort[end-1];
+            toSort[end-1] := toSort[end];
             toSort[end] := temp;
-		
-	    	var temp2 := toMatch[end-1];
-	    	toMatch[end-1] := toMatch[end];
-	    	toMatch[end] := temp2;
-		
-		    end := end -1;
+        
+            var temp2 := toMatch[end-1];
+            toMatch[end-1] := toMatch[end];
+            toMatch[end] := temp2;
+        
+            end := end -1;
         }
         start := start + 1;
     }
@@ -290,32 +264,28 @@ modifies toMatch;
 }
 
 
-// method Test()
-// {
-//     var nums := new int[3];
+method TestInsertionSort()
+{
+    var nums := new int[3];
   
-//     var blood := new Blood[3];
-//     var temp := new Blood(10);
-//     blood[0] := temp; 
-//     temp := new Blood(5);
-//     blood[1] := temp;
-//     temp := new Blood(1);
-//     blood[2] := temp;
+    var blood := new Blood[3];
+    var temp := new Blood(10);
+    blood[0] := temp; 
+    temp := new Blood(5);
+    blood[1] := temp;
+    temp := new Blood(1);
+    blood[2] := temp;
    
-//     nums[0] := blood[0].expiry_time;
-//     nums[1] := blood[1].expiry_time;
-//     nums[2] := blood[2].expiry_time; 
+    nums[0] := blood[0].expiry_time;
+    nums[1] := blood[1].expiry_time;
+    nums[2] := blood[2].expiry_time; 
 
-//     assert nums.Length == blood.Length;
-//     assert forall x,y ::0 <= x < nums.Length &&  0 <= y < blood.Length && x == y ==> nums[x] == blood[y].expiry_time; 
-//     insertionSort(nums, blood);
-//     assert Sorted(nums,0,nums.Length-1); // array is sorted and blood has maintained 1-1 correspondence with the now sorted array
-//     assert forall x, y :: 0 <= x < nums.Length && 0 <= y < blood.Length && x == y && blood[y] != null ==> nums[x] == blood[y].expiry_time;    
-// }
-
-// Storage class
-
-/////////////////////////////////////////////////////////////////////////////////////////////
+    assert nums.Length == blood.Length;
+    assert forall x,y ::0 <= x < nums.Length &&  0 <= y < blood.Length && x == y ==> nums[x] == blood[y].expiry_time; 
+    insertionSort(nums, blood);
+    assert Sorted(nums,0,nums.Length-1); // array is sorted and blood has maintained 1-1 correspondence with the now sorted array
+    assert forall x, y :: 0 <= x < nums.Length && 0 <= y < blood.Length && x == y && blood[y] != null ==> nums[x] == blood[y].expiry_time;    
+}
 
 class Storage {
 
@@ -364,7 +334,8 @@ class Storage {
     predicate Valid()
     reads this
     reads this.bloodStorage
-    {|bloodStorage|==8 && (forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null))}
+    // reads this.shadowblood
+    {|bloodStorage|==8 && forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null)}
 
 
 
@@ -382,33 +353,20 @@ class Storage {
     // Stores blood and sorts according to expiry
     method storeBlood(curr_time:int,b: Blood)
     requires b != null
-    requires b.get_state()==verified
     requires Valid()
     modifies this
-    modifies b
     ensures Valid()
-    requires forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
     // Ensures other blood arrays haven't been altered
     ensures forall x :: 0<=x<|bloodStorage| && x!=findIndex(b.blood_type, b.rhesus) ==> bloodStorage[x]==old(bloodStorage[x])
     ensures forall x :: 0<=x<|bloodStorage| && x!=findIndex(b.blood_type, b.rhesus) ==> multiset(bloodStorage[x][..])==multiset(old(bloodStorage[x][..]))
-    // Ensures if blood is valid for change then specified blood array has only had element added
-    // But if blood is unsafe, do not change anything
-    ensures if b.safe(curr_time) then multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..]+[b]))) else multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])))
-    // Ensure if blood is unsafe, then bloodstorage hasn't been changed
-    ensures !b.safe(curr_time) ==> bloodStorage==old(bloodStorage)
-    // Ensures that all blood arrays are correctly sorted
-    ensures forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
+    // Ensures specified blood array has only had element added
+    ensures multiset(bloodStorage[findIndex(b.blood_type, b.rhesus)][..])==(multiset(old(bloodStorage[findIndex(b.blood_type, b.rhesus)][..]+[b])))
 
     {
-        var temp := b.store_blood(curr_time);
-        if(!temp) {
-            return;
-        }
-
-
-        assert forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime());
-
+        // if (b)
         var index := findIndex(b.blood_type, b.rhesus);
+        // assert 0<=index<|bloodStorage|;
+        // Update real array
 
         var prevSize := bloodStorage[index].Length;
         var newArray := new Blood[prevSize+1];
@@ -417,25 +375,19 @@ class Storage {
 
         assert forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x] !=null;
 
-
-
         while i < prevSize
         decreases prevSize - i
         invariant i - 1 < prevSize
         invariant bloodStorage==old(bloodStorage)
         invariant forall x ::  0<=x<i ==> newArray[x]!=null
         invariant forall x ::  0<=x<i ==> valuearray[x]==newArray[x].getExpiryTime()
-        invariant newArray[..i] == bloodStorage[index][..i]
-        invariant findIndex(b.blood_type, b.rhesus)==index;
-        invariant b.safe(curr_time)
-        invariant forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
+        invariant  newArray[..i] == bloodStorage[index][..i]
         {
             newArray[i] := bloodStorage[index][i];
             valuearray[i] := newArray[i].getExpiryTime();
             i := i + 1;
         }
 
-         
         newArray[newArray.Length-1]:=b;
         valuearray[newArray.Length-1]:=b.getExpiryTime();
 
@@ -446,52 +398,28 @@ class Storage {
         bloodStorage := bloodStorage[index:= newArray];
     }
 
+    // ISSUE: There are extra requires clauses in transportationManager's receive()
+    //        that storage cannot supply. Storage can only require the below successfully,
+    //        is it possible to change receive() so that it can be called from here?
+
+    // Gives blood to transport so that they can prepare to dispatch it to the destination
+    method notifyTransport(b: Blood, dest: int)
+    requires b != null
+    requires transportManager != null
+    {
+        //transManager.receive(b, dest);
+        //transManager.dispatchBlood();
+    }
 
 
 
-
-
-    // method discardBlood(curr_time:int)
-    // requires Valid()
-    // requires forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
-    // modifies this
-    // modifies this.bloodStorage
-    // modifies set j | 0<=j<|this.bloodStorage| :: this.bloodStorage[j]
-    // ensures Valid()
-    // {
-    //     var bloodsize := |bloodStorage|;
-    //     var i:=0;
-    //     var x;
-    //     while i < bloodsize
-    //     modifies this
-    //     modifies this.bloodStorage
-    //     modifies set j | 0<=j<|this.bloodStorage| :: this.bloodStorage[j]
-    //     decreases bloodsize-i
-    //     invariant |bloodStorage|==8 && (forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null))
-    //     invariant forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
-    //     {
-    //         while bloodStorage[i].Length>0 && bloodStorage[i][0].getExpiryTime() - curr_time < 60*60*25
-    //         modifies this
-    //         modifies this.bloodStorage
-    //         modifies set j | 0<=j<|this.bloodStorage| :: this.bloodStorage[j]
-    //         invariant |bloodStorage|==8 && (forall x :: 0<=x<|bloodStorage| ==> bloodStorage[x]!=null && (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null))
-    //         invariant forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
-    //         {
-    //             // We want to discard blood, so ignore return value
-    //             x:=pop(i); 
-    //         }
-    //         i:=i+1;
-    //     }
-    // }
- 
 
     // Helper: Remove head of array and return it
     method pop(index: int) returns (b: Blood)
     requires 0 <= index <= 7
     requires Valid()
-    requires forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
     modifies this
-    modifies this.bloodStorage
+    modifies bloodStorage
     ensures Valid()
     // Ensures other blood storage arrays haven't been altered
     ensures forall x :: 0<=x<|bloodStorage| && x!=index ==> bloodStorage[x]==old(bloodStorage[x])
@@ -503,8 +431,6 @@ class Storage {
     ensures if old(bloodStorage[index].Length)>0 then forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x]==old(bloodStorage[index][x+1]) else forall x :: 0<=x<bloodStorage[index].Length ==> bloodStorage[index][x]==old(bloodStorage[index][x])
     ensures if old(bloodStorage[index].Length)>0 then multiset(bloodStorage[index][..])==multiset(old(bloodStorage[index][1..])) else multiset(bloodStorage[index][..])==multiset(old(bloodStorage[index][..]))
     ensures if old(bloodStorage[index].Length)>0 then b==old(bloodStorage[index][0]) else b==null
-    ensures forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
-    ensures fresh (bloodStorage)
     {
 
         
@@ -532,7 +458,6 @@ class Storage {
             invariant forall x :: 0<=x<|bloodStorage| ==> (forall y :: 0<=y<bloodStorage[x].Length ==> bloodStorage[x][y]!=null)
             invariant forall x :: 0<=x<|bloodStorage| ==> multiset(bloodStorage[x][..])==multiset(old(bloodStorage[x][..]))
             invariant multiset(newArray[..i])==multiset(old(bloodStorage[index][1..i+1]))
-            invariant forall x :: 0<=x<|bloodStorage| ==> (forall y,z :: 0<=y<z<bloodStorage[x].Length ==> bloodStorage[x][y].getExpiryTime()<=bloodStorage[x][z].getExpiryTime())
             invariant newArray!=null
             {
                 newArray[i] := a[i + 1];
@@ -578,110 +503,259 @@ class Storage {
 
 
 class transportationManager {
-	
-	var locale: int; // each location represented as an int
-	var available: int; // place in buffer to add new blood
-	var size : int; // size of blood/dests to store in manager (realistically will be a fairly large number)
-	var toSend: array<Blood>;// := new Blood[10]; // blood to send 
+    
+    var locale: int; // each location represented as an int
+    var available: int; // place in buffer to add new blood
+    var size : int; // size of blood/dests to store in manager (realistically will be a fairly large number)
+    var toSend: array<Blood>;// := new Blood[10]; // blood to send 
     var toDest: array<int>;// := new int[10]; // des of blood to send (index matches with toSend)
 
-    	
+        
 
-	// Blood always has a destination, ie every blood in array is matched by a route
-	predicate method Valid()
-	reads this;
-	reads this.toDest;
-	reads this.toSend;
-	requires toDest != null;
-	requires toSend != null;
-	{
-		toDest != null && 
-		toSend != null && 
-		size > 0       && 
-		size == toSend.Length && 
-		size == toDest.Length && 
-		-1 <= available <= size -1 &&
-		forall x :: 0 <= x < size && toSend[x] != null ==> toDest[x] != -1
-	}
+    // Blood always has a destination, ie every blood in array is matched by a route
+    predicate method Valid()
+    reads this;
+    reads this.toDest;
+    reads this.toSend;
+    requires toDest != null;
+    requires toSend != null;
+    {
+        toDest != null && 
+        toSend != null && 
+        size > 0       && 
+        size == toSend.Length && 
+        size == toDest.Length && 
+        -1 <= available <= size -1 &&
+        forall x :: 0 <= x < size && toSend[x] != null ==> toDest[x] != -1
+    }
 
 
-	method Init(src: int)
-	modifies this;
-	modifies toDest;
-	modifies toSend;
-	modifies `locale;
-	modifies `available;
-	modifies `size;
-	requires src >= 0
-	ensures toDest != null;
-	ensures toSend != null;
-	ensures Valid()
-	{
-		locale := src;
-		size := 10; // An example amount
-		toDest := new int[size]; 
-		forall x | 0 <= x < toDest.Length {toDest[x] := -1;}
-		toSend := new Blood[size];
-		forall x | 0 <= x < toSend.Length {toSend[x] := null;}
-		available := -1;
-		assert toDest != null;
-		assert toSend != null;
-		var i := 0;
+    method Init(src: int)
+    modifies this;
+    modifies toDest;
+    modifies toSend;
+    modifies `locale;
+    modifies `available;
+    modifies `size;
+    requires src >= 0
+    ensures toDest != null;
+    ensures toSend != null;
+    ensures Valid()
+    {
+        locale := src;
+        size := 10; // An example amount
+        toDest := new int[size]; 
+        forall x | 0 <= x < toDest.Length {toDest[x] := -1;}
+        toSend := new Blood[size];
+        forall x | 0 <= x < toSend.Length {toSend[x] := null;}
+        available := -1;
+        assert toDest != null;
+        assert toSend != null;
+        var i := 0;
         var j := 0;
-	}
+    }
 
-	// Blood is recieved, store in available location
-	method receive(bld:Blood, dst:int)
-	modifies this.toDest
-	modifies this.toSend 
-	modifies this`available
-	requires toSend != null;
-	requires toDest != null;
-	requires forall x :: 0 <= x < toSend.Length ==> bld != toSend[x] // blood is not already in toSend
-	requires bld != null;
-	requires dst >= 0;
-	requires Valid(); ensures Valid();
-	ensures 0 <= available < toSend.Length && 0 <= available < toDest.Length
-	ensures toSend[available] == bld
-	ensures toDest[available] == dst
-	ensures forall x :: 0 <=x < size && x != available ==> toDest[x] == old(toDest)[x]
-	ensures forall x :: 0 <= x < size && x != available ==> toSend[x] == old(toSend)[x]
-	{
-		
-		available := if available == size -1 then 0 else available + 1; // If buffer is full, overwrite last stored value. Only send latest n blood objects
-		toSend[available] := bld;
-		toDest[available] := dst;
-		
-	}
+    // Blood is recieved, store in available location
+    method receive(bld:Blood, dst:int)
+    modifies this.toDest
+    modifies this.toSend 
+    modifies this`available
+    requires toSend != null;
+    requires toDest != null;
+    requires forall x :: 0 <= x < toSend.Length ==> bld != toSend[x] // blood is not already in toSend
+    requires bld != null;
+    requires dst >= 0;
+    requires Valid(); ensures Valid();
+    ensures 0 <= available < toSend.Length && 0 <= available < toDest.Length
+    ensures toSend[available] == bld
+    ensures toDest[available] == dst
+    ensures forall x :: 0 <=x < size && x != available ==> toDest[x] == old(toDest)[x]
+    ensures forall x :: 0 <= x < size && x != available ==> toSend[x] == old(toSend)[x]
+    {
+        
+        available := if available == size -1 then 0 else available + 1; // If buffer is full, overwrite last stored value. Only send latest n blood objects
+        toSend[available] := bld;
+        toDest[available] := dst;
+        
+    }
 
-	// Blood is dispatched, toSend and toDest are emptied and available is adjusted
-	method dispatchBlood()
-	modifies this.toSend;
-	modifies this.toDest;
-	modifies this`available;
-	requires toSend != null;
-	requires toDest != null;
-	requires exists x :: 0 <= x < toSend.Length && toSend[x] != null // blood is to be sent
-	requires Valid();
-	ensures Valid();
-    	ensures forall x, y:: 0 <= x < toSend.Length && 0 <= y < toDest.Length  && x == y ==> (toSend[x] == null && toDest[y] == -1) // toSend and toRoute are empty
-	{
-		var i := 0;
-		var j := 0;
-		while (i < toSend.Length && j < toDest.Length)
-		invariant 0 <= i <= toSend.Length
-		invariant 0 <= j <= toDest.Length
-		invariant forall x :: 0 <= x < i ==> toSend[x] == null
-		invariant forall x :: 0 <= x < j ==> toDest[x] == -1
-		invariant i == j
-		{
-			// dispatch
-			toDest[j] := -1;
-			toSend[i] := null;
-			i := i + 1;
-			j := j + 1;
-		}
-		available := toSend.Length -1;	
-    	}
+    // Blood is dispatched, toSend and toDest are emptied and available is adjusted
+    method dispatchBlood()
+    modifies this.toSend;
+    modifies this.toDest;
+    modifies this`available;
+    requires toSend != null;
+    requires toDest != null;
+    requires exists x :: 0 <= x < toSend.Length && toSend[x] != null // blood is to be sent
+    requires Valid();
+    ensures Valid();
+        ensures forall x, y:: 0 <= x < toSend.Length && 0 <= y < toDest.Length  && x == y ==> (toSend[x] == null && toDest[y] == -1) // toSend and toRoute are empty
+    {
+        var i := 0;
+        var j := 0;
+        while (i < toSend.Length && j < toDest.Length)
+        invariant 0 <= i <= toSend.Length
+        invariant 0 <= j <= toDest.Length
+        invariant forall x :: 0 <= x < i ==> toSend[x] == null
+        invariant forall x :: 0 <= x < j ==> toDest[x] == -1
+        invariant i == j
+        {
+            // dispatch
+            toDest[j] := -1;
+            toSend[i] := null;
+            i := i + 1;
+            j := j + 1;
+        }
+        available := toSend.Length -1;  
+        }
     
+}
+class pathology {
+    
+
+    var tMan: transportationManager;
+    
+    method Init(t : transportationManager)
+    modifies this
+    modifies tMan
+    //ensures fresh(tMan)
+    {
+        tMan := t;
+    }
+    
+    
+    method accept (bld : Blood)
+    modifies tMan
+    modifies tMan.toDest
+    modifies tMan.toSend
+    modifies tMan`locale
+    modifies bld
+    requires this.tMan != null
+    
+    requires tMan.toSend != null
+    requires tMan.toDest != null
+    requires forall x :: 0 <= x < tMan.toSend.Length ==> tMan.toSend[x] != bld
+    requires tMan.Valid()
+    requires bld != null
+    requires bld.state == unverified
+    ensures tMan != null
+    {
+        verify(bld);
+        if (bld.state == verified) {
+            // do something
+            tMan.receive(bld, 1); // system will find a suitable dest for blood
+            tMan.dispatchBlood();
+        } else {
+            // blood is discarded and not sent further
+        }
+    
+
+    }
+
+    method verify(bld:Blood) 
+    modifies bld
+    requires bld != null
+    requires bld.state == unverified
+    ensures bld.state == verified || bld.state == unsafe 
+    ensures bld.blood_type == O || bld.blood_type == A || bld.blood_type == AB || bld.blood_type == B
+    ensures bld.rhesus == false || bld.rhesus == true
+    ensures bld != null
+    {
+        var bType := O; // practically will be any blood_type as per blood class limits
+        var chosenRhes := false; // practically will be 0 or 1
+        var accepted := true;
+
+        bld.verify_blood(1,accepted,bType,chosenRhes);
+
+    }
+}
+
+
+class hospital {
+
+    var x : int;
+    var y : int;
+    var name : string;
+    var tMan : transportationManager;
+    var blood : array<Blood>;   
+    var size: int;
+    var available: int; 
+    var patho : pathology;
+    
+
+    predicate method Valid()
+    reads this;
+    reads this.blood;
+    requires blood != null;
+    {
+        blood != null &&
+        size > 0 &&
+        size == blood.Length &&
+        -1 < available <= size -1
+    }
+
+    method init(nm:string, xVal:int, yVal:int) 
+    modifies this
+    modifies this`x
+    modifies this`y
+    modifies this`name
+    modifies this.blood
+    modifies this`size
+    modifies this`available
+    {
+        name := nm;
+        x := xVal;
+        y := yVal;
+        size := 10;
+        available := 0; 
+        blood := new Blood[size];
+    }
+
+    method collect_blood(donordb: map<int,int>, donor_id: int, curr_time: int) 
+    modifies this.blood
+    modifies this`available
+    requires patho != null
+    requires blood != null
+    requires forall x :: 0 <= x < blood.Length && blood[x] != null ==> blood[x].state == verified
+    requires Valid();ensures Valid();
+    ensures blood[available] != null ==> blood[available].state == verified
+    ensures 0 <= available < blood.Length
+    {
+        if donor_id in donordb {
+            // do something
+        }
+        var allowed := true; // determined by value in donor class
+        if (allowed) {
+            var bld := new Blood(1); // blood as collected from donor class
+            patho.verify(bld);
+            if bld.state == verified {
+                available := if available == size -1 then 0 else available + 1;
+                blood[available] := bld;
+            }
+
+        } else {
+            // Can't take blood, too soon since last donation time
+        }
+    }
+
+    method obtainBlood()
+    modifies this.blood
+    requires blood != null
+    requires Valid();
+    ensures blood != null
+    ensures Valid()
+    ensures forall x :: 0 <= x < blood.Length ==> blood[x] == null
+    {   
+        var toSend := blood;
+        // toSend is sent to transport on dispatch request
+        var i := 0;
+        while (i < blood.Length) 
+        invariant 0 <= i <= blood.Length
+        invariant forall x :: 0 <= x < i ==> blood[x] == null;
+        {
+            blood[i] := null;
+            i := i + 1;
+        }
+    }
+
 }
